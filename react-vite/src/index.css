@@ -1,0 +1,16 @@
+/* TODO: Add sitewide styles */
+
+html {
+    background: #00A86B;  /* Fallback jade green */
+    background: linear-gradient(
+      45deg,
+      #00A86B 0%,        /* Jade Green */
+      #FFF44F 50%,       /* Lemon Yellow */
+      #7851A9 100%       /* Royal Purple */
+    );
+    min-height: 100vh;   /* Ensures full coverage */
+  }
+
+#root {
+    background-color: #00A86B;
+}
