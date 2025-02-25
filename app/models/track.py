@@ -1,6 +1,7 @@
 from .db import db, environment, SCHEMA
 from sqlalchemy.sql import func
 
+
 class Track(db.Model):
     __tablename__ = 'tracks'
 
@@ -18,6 +19,11 @@ class Track(db.Model):
     user = db.relationship('User', back_populates='tracks')
     comments = db.relationship('Comment', back_populates='track', cascade='all, delete-orphan')
     likes = db.relationship('Like', back_populates='track', cascade='all, delete-orphan')
+    playlists = db.relationship(
+        'Playlist',
+        secondary='playlist_tracks',
+        back_populates='tracks'
+    )
 
     def to_dict(self):
         return {

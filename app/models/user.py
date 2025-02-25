@@ -14,10 +14,10 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.now())
 
-    tracks = db.relationship('Track', backref='user', lazy=True)
-    playlists = db.relationship('Playlist', backref='user', lazy=True)
-    comments = db.relationship('Comment', backref='user', lazy=True)
-    likes = db.relationship('Like', backref='user', lazy=True)
+    tracks = db.relationship('Track', back_populates='user', lazy=True)
+    playlists = db.relationship('Playlist', back_populates='user', lazy=True)
+    comments = db.relationship('Comment', back_populates='user', lazy=True)
+    likes = db.relationship('Like', back_populates='user', lazy=True)
 
     @property
     def password(self):

@@ -1,5 +1,6 @@
 from .db import db, environment, SCHEMA
 from sqlalchemy.sql import func
+from .playlist_tracks import playlist_tracks
 
 class Playlist(db.Model):
     __tablename__ = 'playlists'

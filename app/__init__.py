@@ -8,6 +8,10 @@ from .models import db, User, Track, Playlist, Like, Comment
 from .api.user_routes import user_routes
 from .api.auth_routes import auth_routes
 from .api.playlist_routes import main_routes
+from .api.track_routes import tracks_routes
+from .api.user_playlist_routes import playlist_routes
+from .api.comment_routes import comments_routes
+from .api.like_routes import likes_routes
 from .seeds import seed_commands
 from .config import Config
 
@@ -30,6 +34,10 @@ app.config.from_object(Config)
 app.register_blueprint(user_routes, url_prefix='/api/users')
 app.register_blueprint(auth_routes, url_prefix='/api/auth')
 app.register_blueprint(main_routes, url_prefix='/api/playlist')
+app.register_blueprint(tracks_routes, url_prefix='/api/tracks')
+app.register_blueprint(playlist_routes, url_prefix='/api/playlist')
+app.register_blueprint(comments_routes, url_prefix='/api/comments')
+app.register_blueprint(likes_routes, url_prefix='/api/likes')
 db.init_app(app)
 Migrate(app, db)
 
