@@ -1,10 +1,12 @@
-from flask import render_template, Blueprint, request
+# app/routes.py
+
+from flask import jsonify, Blueprint, request
 from sqlalchemy import desc, func
 from app.models import Track, Like
 
 main_routes = Blueprint('main', __name__)
 
-@main_routes.route('/')
+@main_routes.route('/ultimate_playlist')
 def ultimate_playlist():
     # Retrieve query parameters for pagination, sorting, and filtering
     page = request.args.get('page', 1, type=int)
@@ -33,8 +35,16 @@ def ultimate_playlist():
     # Apply pagination
     paginated_tracks = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    return render_template(
-        'ultimate_playlist.html',
-        tracks=paginated_tracks.items,
-        pagination=paginated_tracks
-    )
+    # Serialize the track data
+    tracks = [track.to_dict() for track in paginated_tracks.items]
+
+    # Return JSON response
+    return jsonify({
+        'tracks': tracks,
+        'pagination': {
+            'page': paginated_tracks.page,
+            'per_page': paginated_tracks.per_page,
+            'total_pages': paginated_tracks.pages,
+            'total_items': paginated_tracks.total
+        }
+    })
