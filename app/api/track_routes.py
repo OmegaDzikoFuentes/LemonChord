@@ -150,11 +150,7 @@ def get_track(track_id):
 @tracks_routes.route('/<int:track_id>', methods=['PUT', 'PATCH'])
 @login_required
 def update_track(track_id):
-    track = Track.query.get_or_404(track_id)
-
-    # Ensure that only the owner can update the track
-    if track.user_id != current_user.id:
-        abort(403)
+    track = Track.query.filter_by(id=track_id, user_id=current_user.id).first_or_404()
 
     # Handle form data for file uploads and JSON data for other updates
     if request.content_type and 'multipart/form-data' in request.content_type:
@@ -238,7 +234,7 @@ def update_track(track_id):
 @tracks_routes.route('/<int:track_id>', methods=['DELETE'])
 @login_required
 def delete_track(track_id):
-    track = Track.query.get_or_404(track_id)
+    track = Track.query.filter_by(id=track_id, user_id=current_user.id).first_or_404()
 
     # Only the owner may delete the track
     if track.user_id != current_user.id:

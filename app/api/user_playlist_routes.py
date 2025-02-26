@@ -82,3 +82,24 @@ def remove_track_from_playlist(playlist_id, track_id):
     playlist.tracks.remove(track)
     db.session.commit()
     return jsonify(playlist.to_dict()), 200
+
+# Add bulk track operations
+def add_tracks_to_playlist(playlist_id):
+    playlist = Playlist.query.get_or_404(playlist_id)
+    data = request.get_json() or {}
+    track_ids = data.get('track_ids', [])
+    
+    tracks = Track.query.filter(Track.id.in_(track_ids)).all()
+    playlist.tracks.extend(tracks)
+    db.session.commit()
+
+def get_playlist_tracks(playlist_id):
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    
+    playlist = Playlist.query.get_or_404(playlist_id)
+    tracks = playlist.tracks.paginate(
+        page=page, 
+        per_page=per_page, 
+        error_out=False
+    )

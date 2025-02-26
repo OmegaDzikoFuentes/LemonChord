@@ -1,5 +1,4 @@
 # app/routes.py
-
 from flask import jsonify, Blueprint, request
 from sqlalchemy import desc, func
 from app.models import Track, Like
