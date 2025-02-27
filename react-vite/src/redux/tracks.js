@@ -32,7 +32,7 @@ export const thunkFetchTracks = (
   sort_by = 'created_at',
   genre = null
 ) => async (dispatch) => {
-  let url = `/api/main/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
+  let url = `/api/tracks?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
   if (genre) url += `&genre=${genre}`;
   const response = await fetch(url);
   if (response.ok) {
@@ -49,11 +49,10 @@ export const thunkCreateTrack = (formData) => async (dispatch) => {
     method: 'POST',
     body: formData
   });
-  if (response.ok) {
-    const newTrack = await response.json();
-    dispatch(addTrack(newTrack));
-    return newTrack;
-  }
+  
+  const newTrack = await response.json();
+  dispatch(addTrack(newTrack));
+  return newTrack;
 };
 
 // Thunk: Update an existing track
@@ -97,8 +96,9 @@ const tracksReducer = (state = initialState, action) => {
       return { ...state, [action.payload.id]: action.payload };
     }
     case REMOVE_TRACK: {
-      const { [action.payload]: removed, ...rest } = state;
-      return rest;
+      const newState = { ...state };
+      delete newState[action.payload];
+      return newState;
     }
     default:
       return state;

@@ -11,8 +11,8 @@ tracks_routes = Blueprint('tracks', __name__)
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
-# Maximum file size (10MB)
-MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+# Maximum file size (100MB)
+MAX_CONTENT_LENGTH = 100 * 1024 * 1024
 
 def allowed_file(filename):
     return '.' in filename and \

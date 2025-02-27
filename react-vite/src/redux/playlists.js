@@ -1,5 +1,3 @@
-// playlists.js
-
 // Action Types
 const LOAD_PLAYLISTS = 'playlists/loadPlaylists';
 const ADD_PLAYLIST = 'playlists/addPlaylist';
@@ -17,15 +15,18 @@ const addPlaylist = (playlist) => ({
   payload: playlist
 });
 
-const updatePlaylist = (playlist) => ({
-  type: UPDATE_PLAYLIST,
-  payload: playlist
-});
 
-const removePlaylist = (playlistId) => ({
-  type: REMOVE_PLAYLIST,
-  payload: playlistId
-});
+// commented out to avoid unused variable errors.
+
+// const updatePlaylist = (playlist) => ({
+//   type: UPDATE_PLAYLIST,
+//   payload: playlist
+// });
+
+// const removePlaylist = (playlistId) => ({
+//   type: REMOVE_PLAYLIST,
+//   payload: playlistId
+// });
 
 // Thunks 
 export const thunkFetchPlaylists = () => async (dispatch) => {
@@ -67,8 +68,9 @@ const playlistsReducer = (state = initialState, action) => {
       return { ...state, [action.payload.id]: action.payload };
     }
     case REMOVE_PLAYLIST: {
-      const { [action.payload]: removed, ...rest } = state;
-      return rest;
+      const newState = { ...state };
+      delete newState[action.payload];
+      return newState;
     }
     default:
       return state;
