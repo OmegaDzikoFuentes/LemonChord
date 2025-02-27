@@ -31,9 +31,8 @@ def upload_file_to_s3(file, filename):
     try:
         s3_client = boto3.client(
             's3',
-            aws_access_key_id=current_app.config.get('AWS_ACCESS_KEY'),
-            aws_secret_access_key=current_app.config.get('AWS_SECRET_KEY'),
-            region_name=current_app.config.get('AWS_REGION')
+            aws_access_key_id=current_app.config.get('S3_KEY'),
+            aws_secret_access_key=current_app.config.get('S3_SECRET')
         )
         
         bucket_name = current_app.config.get('S3_BUCKET')
@@ -48,7 +47,7 @@ def upload_file_to_s3(file, filename):
         )
         
         # Generate the URL for the uploaded file
-        return f"https://{bucket_name}.s3.{current_app.config.get('AWS_REGION')}.amazonaws.com/{filename}"
+        return f"https://{bucket_name}.s3.amazonaws.com/{filename}"
     except Exception as e:
         current_app.logger.error(f"S3 upload error: {str(e)}")
         return None
@@ -58,14 +57,13 @@ def delete_file_from_s3(file_url):
     try:
         s3_client = boto3.client(
             's3',
-            aws_access_key_id=current_app.config.get('AWS_ACCESS_KEY'),
-            aws_secret_access_key=current_app.config.get('AWS_SECRET_KEY'),
-            region_name=current_app.config.get('AWS_REGION')
+            aws_access_key_id=current_app.config.get('S3_KEY'),
+            aws_secret_access_key=current_app.config.get('S3_SECRET')
         )
         
         bucket_name = current_app.config.get('S3_BUCKET')
         # Extract key from URL
-        file_key = file_url.split(f"https://{bucket_name}.s3.{current_app.config.get('AWS_REGION')}.amazonaws.com/")[1]
+        file_key = file_url.split(f"https://{bucket_name}.s3.amazonaws.com/")[1]
         
         s3_client.delete_object(
             Bucket=bucket_name,
