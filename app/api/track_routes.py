@@ -2,7 +2,7 @@ import os
 import uuid
 import boto3
 from datetime import datetime
-from flask import Blueprint, request, jsonify, abort, current_app
+from flask import Blueprint, request, jsonify, abort, current_app, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from app.models import db, Track
@@ -10,6 +10,9 @@ from app.utils.errors import (
     api_success, api_error, ValidationError, AuthorizationError, 
     FileUploadError, validate_file_size, validate_file_extension
 )
+
+# Import the upload form
+from app.forms.upload_form import UploadForm
 
 tracks_routes = Blueprint('tracks', __name__)
 
@@ -74,7 +77,7 @@ def delete_file_from_s3(file_url):
         current_app.logger.error(f"S3 delete error: {str(e)}")
         return False
 
-# Route to create/upload a new track
+# Existing API endpoint for programmatic uploads
 @tracks_routes.route('/', methods=['POST'])
 @login_required
 def create_track():
@@ -124,24 +127,64 @@ def create_track():
         return api_success(new_track.to_dict(), "Track uploaded successfully", 201)
         
     except ValidationError as e:
-        # These will be caught by the global handler
         raise
     except FileUploadError as e:
-        # Delete any partial files if needed
         raise
     except Exception as e:
-        # Rollback transaction on error
         db.session.rollback()
-        
-        # Delete the uploaded file if database operation fails
         if 'file_url' in locals():
             if current_app.config.get('USE_S3', False):
                 delete_file_from_s3(file_url)
             elif 'file_path' in locals() and os.path.exists(file_path):
                 os.remove(file_path)
-                
         current_app.logger.error(f"Unexpected error creating track: {str(e)}")
         raise
+
+# New route: Form integration for uploading a track using Flask-WTF
+@tracks_routes.route('/upload/form', methods=['GET', 'POST'])
+@login_required
+def upload_track_form():
+    form = UploadForm()
+    if form.validate_on_submit():
+        try:
+            title = form.title.data
+            genre = form.genre.data
+            duration = form.duration.data
+            audio_file = form.audio_file.data
+
+            # (The FileAllowed validator on the form ensures proper extension,
+            # but we still check file size.)
+            validate_file_size(audio_file, max_size_mb=MAX_CONTENT_LENGTH//(1024*1024))
+
+            original_filename = secure_filename(audio_file.filename)
+            unique_filename = generate_unique_filename(original_filename)
+            
+            if current_app.config.get('USE_S3', False):
+                file_url = upload_file_to_s3(audio_file, unique_filename)
+            else:
+                upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+                os.makedirs(upload_folder, exist_ok=True)
+                file_path = os.path.join(upload_folder, unique_filename)
+                audio_file.save(file_path)
+                file_url = file_path
+
+            new_track = Track(
+                title=title,
+                audio_url=file_url,
+                genre=genre,
+                duration=duration,
+                user_id=current_user.id,
+                original_filename=original_filename
+            )
+            db.session.add(new_track)
+            db.session.commit()
+            flash("Track uploaded successfully", "success")
+            return redirect(url_for('tracks.get_track', track_id=new_track.id))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error uploading track via form: {str(e)}")
+            flash("An error occurred while uploading your track.", "danger")
+    return render_template('upload_track.html', form=form)
 
 # Route to "listen" to a track (i.e. get its details)
 @tracks_routes.route('/<int:track_id>', methods=['GET'])
@@ -155,14 +198,10 @@ def get_track(track_id):
 def update_track(track_id):
     try:
         track = Track.query.filter_by(id=track_id, user_id=current_user.id).first_or_404()
-        
-        # Store old file URL in case we need to delete it later
         old_file_url = None
         file_url = None
         
-        # Handle form data for file uploads and JSON data for other updates
         if request.content_type and 'multipart/form-data' in request.content_type:
-            # Update from form data
             if 'title' in request.form:
                 track.title = request.form.get('title')
             if 'genre' in request.form:
@@ -170,22 +209,13 @@ def update_track(track_id):
             if 'duration' in request.form:
                 track.duration = request.form.get('duration')
             
-            # Handle audio file update
             if 'audio_file' in request.files:
                 audio_file = request.files['audio_file']
-                
-                # Validate file
                 validate_file_extension(audio_file.filename, ALLOWED_EXTENSIONS)
                 validate_file_size(audio_file, max_size_mb=MAX_CONTENT_LENGTH//(1024*1024))
-                
-                # Generate unique filename
                 original_filename = secure_filename(audio_file.filename)
                 unique_filename = generate_unique_filename(original_filename)
-                
-                # Store old file URL to delete after successful update
                 old_file_url = track.audio_url
-                
-                # Upload new file
                 if current_app.config.get('USE_S3', False):
                     file_url = upload_file_to_s3(audio_file, unique_filename)
                 else:
@@ -194,14 +224,10 @@ def update_track(track_id):
                     file_path = os.path.join(upload_folder, unique_filename)
                     audio_file.save(file_path)
                     file_url = file_path
-                
-                # Update track with new file info
                 track.audio_url = file_url
                 track.original_filename = original_filename
         else:
-            # Accept JSON data for basic updates
             data = request.get_json() or {}
-            
             if 'title' in data:
                 track.title = data['title']
             if 'genre' in data:
@@ -209,10 +235,8 @@ def update_track(track_id):
             if 'duration' in data:
                 track.duration = data['duration']
         
-        # Commit changes to database
         db.session.commit()
         
-        # Delete old file if we replaced it
         if old_file_url:
             if current_app.config.get('USE_S3', False):
                 delete_file_from_s3(old_file_url)
@@ -225,7 +249,6 @@ def update_track(track_id):
     except ValidationError:
         raise
     except FileUploadError:
-        # Clean up any new partial uploads
         if file_url and current_app.config.get('USE_S3', False):
             delete_file_from_s3(file_url)
         elif 'file_path' in locals() and os.path.exists(file_path):
@@ -243,22 +266,19 @@ def update_track(track_id):
 def delete_track(track_id):
     try:
         track = Track.query.filter_by(id=track_id, user_id=current_user.id).first_or_404()
-
-        # Only the owner may delete the track
         if track.user_id != current_user.id:
             raise AuthorizationError("You don't have permission to delete this track")
         
-        # Store file URL for deletion after database record is removed
         file_url = track.audio_url
         
         db.session.delete(track)
         db.session.commit()
         
-        # Delete the associated file
         if current_app.config.get('USE_S3', False):
             delete_file_from_s3(file_url)
         else:
-            os.remove(file_url) if os.path.exists(file_url) else None
+            if os.path.exists(file_url):
+                os.remove(file_url)
             
         return api_success(message="Track deleted successfully")
         
