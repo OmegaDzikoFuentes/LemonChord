@@ -15,11 +15,11 @@ class Config:
     
     # File upload settings
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'uploads')
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB limit for file uploads
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB limit for file uploads
     
     # AWS S3 Configuration
     USE_S3 = os.environ.get('USE_S3', 'False') == 'True'
-    AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS_KEY')
-    AWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
-    AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+    AWS_ACCESS_KEY = os.environ.get('S3_KEY')
+    AWS_SECRET_KEY = os.environ.get('S3_SECRET')
+    AWS_REGION = os.environ.get('S3_REGION', 'us-east-2')
     S3_BUCKET = os.environ.get('S3_BUCKET')

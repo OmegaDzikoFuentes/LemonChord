@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Track</title>
+</head>
+<body>
+  <h1>Upload a New Track</h1>
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>
+      {{ form.title.label }}<br>
+      {{ form.title(size=40) }}
+    </p>
+    <p>
+      {{ form.genre.label }}<br>
+      {{ form.genre(size=40) }}
+    </p>
+    <p>
+      {{ form.duration.label }}<br>
+      {{ form.duration(size=20) }}
+    </p>
+    <p>
+      {{ form.audio_file.label }}<br>
+      {{ form.audio_file() }}
+    </p>
+    <p><button type="submit">Upload Track</button></p>
+  </form>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul>
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+</body>
+</html>

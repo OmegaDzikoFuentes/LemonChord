@@ -12,6 +12,7 @@ from .api.track_routes import tracks_routes
 from .api.user_playlist_routes import playlist_routes
 from .api.comment_routes import comments_routes
 from .api.like_routes import likes_routes
+from app.utils.errors import register_error_handlers
 from .seeds import seed_commands
 from .config import Config
 
@@ -21,6 +22,7 @@ app = Flask(__name__, static_folder='../react-vite/dist', static_url_path='/')
 login = LoginManager(app)
 login.login_view = 'auth.unauthorized'
 
+register_error_handlers(app)
 
 @login.user_loader
 def load_user(id):
