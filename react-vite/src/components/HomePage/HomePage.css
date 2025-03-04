@@ -135,3 +135,19 @@ button {
 button:hover {
   background: linear-gradient(90deg, #ff8c00, #ffea00);
 }
+
+/* Audio Player Styles */
+audio {
+  width: 100%;
+  margin-top: 10px;
+  background: #333;         /* Dark background to match sections */
+  border: 1px solid #888;    /* Matching border style */
+  border-radius: 5px;        /* Rounded corners */
+  padding: 5px;
+  outline: none;
+}
+
+/* Optional: style fallback text if displayed */
+audio::cue {
+  color: #ffea00; /* Use a bright color for fallback text */
+}

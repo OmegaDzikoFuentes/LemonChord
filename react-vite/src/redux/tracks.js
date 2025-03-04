@@ -25,23 +25,24 @@ const removeTrack = (trackId) => ({
   payload: trackId
 });
 
-// Thunk: Fetch tracks from the ultimate_playlist route
+// Thunk: Fetch tracks from the ultimate_playlist endpoint
 export const thunkFetchTracks = (
   page = 1,
   per_page = 10,
   sort_by = 'created_at',
   genre = null
 ) => async (dispatch) => {
-  let url = `/api/tracks?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
+  let url = `/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}/`;
   if (genre) url += `&genre=${genre}`;
   const response = await fetch(url);
   if (response.ok) {
     const responseData = await response.json();
-    
-    dispatch(loadTracks(responseData.data));
+    // Adjusting for the new structure from ultimate_playlist endpoint
+    dispatch(loadTracks(responseData.data.tracks));
     return responseData;
   }
 };
+
 
 // Thunk: Create a new track (for file uploads, formData is expected)
 export const thunkCreateTrack = (formData) => async (dispatch) => {

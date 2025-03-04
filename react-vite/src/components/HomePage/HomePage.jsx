@@ -7,32 +7,33 @@ import "./HomePage.css";
 function HomePage() {
   const dispatch = useDispatch();
   const sessionUser = useSelector((state) => state.session.user);
-  
-  // Get all tracks and filter by current user (if logged in)
   const tracksObj = useSelector((state) => state.tracks);
+  // Convert tracksObj to an array
+  const tracksArray = Object.values(tracksObj);
+  // Filter to get only the tracks uploaded by the current user
   const userTracks = sessionUser
-    ? Object.values(tracksObj).filter((track) => Number(track.user_id) === Number(sessionUser.id))
+    ? tracksArray.filter(
+        (track) => Number(track.user_id) === Number(sessionUser.id)
+      )
     : [];
-    
   
-  // Get all playlists and filter by current user (if logged in)
+  // Get playlists and filter by current user
   const playlistsObj = useSelector((state) => state.playlists);
   const userPlaylists = sessionUser
-    ? Object.values(playlistsObj).filter((playlist) => playlist.user_id === sessionUser.id)
+    ? Object.values(playlistsObj).filter(
+        (playlist) => playlist.user_id === sessionUser.id
+      )
     : [];
-    
-  
+
   // Local state for upload form
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadGenre, setUploadGenre] = useState("");
   const [uploadDuration, setUploadDuration] = useState("");
 
-  // Fetch tracks (and optionally playlists) on mount
+  // Fetch tracks on mount
   useEffect(() => {
     dispatch(thunkFetchTracks());
-    // If you have a thunk for playlists, dispatch it here:
-    // dispatch(thunkFetchPlaylists());
   }, [dispatch]);
 
   const handleFileChange = (e) => {
@@ -48,7 +49,7 @@ function HomePage() {
       formData.append("genre", uploadGenre || "Unknown");
       formData.append("duration", uploadDuration || 180);
       await dispatch(thunkCreateTrack(formData));
-      // Clear form fields after successful upload
+      // Clear form fields after upload
       setUploadFile(null);
       setUploadTitle("");
       setUploadGenre("");
@@ -61,19 +62,6 @@ function HomePage() {
     const playlistData = { name: "My Playlist" };
     await dispatch(thunkCreatePlaylist(playlistData));
   };
-
-  // Log updates whenever state changes
-  useEffect(() => {
-    console.log("tracksObj updated:", tracksObj);
-  }, [tracksObj]);
-
-  useEffect(() => {
-    console.log("userTracks updated:", userTracks);
-  }, [userTracks]);
-
-  useEffect(() => {
-    console.log("playlistsObj updated:", playlistsObj);
-  }, [playlistsObj]);
 
   return (
     <div className="home-page">
@@ -136,7 +124,12 @@ function HomePage() {
             </div>
             <div>
               <label htmlFor="audio_file">Audio File:</label>
-              <input type="file" id="audio_file" accept="audio/*" onChange={handleFileChange} />
+              <input
+                type="file"
+                id="audio_file"
+                accept="audio/*"
+                onChange={handleFileChange}
+              />
             </div>
             <button type="submit">Upload Song</button>
           </form>
@@ -153,7 +146,13 @@ function HomePage() {
             <ul>
               {userTracks.map((track) => (
                 <li key={track.id}>
-                  {track.title} – {track.genre}
+                  <div>
+                    <strong>{track.title}</strong> – {track.genre}
+                  </div>
+                  {/* Audio player for each track */}
+                  <audio controls src={track.audio_url}>
+                    Your browser does not support the audio element.
+                  </audio>
                 </li>
               ))}
             </ul>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkFetchTracks, thunkCreateTrack } from "../../redux/tracks";
 import { thunkLikeTrack, thunkUnlikeTrack } from "../../redux/likes";
@@ -9,13 +9,14 @@ import "./MainPlaylist.css";
 
 function MainPage() {
   const dispatch = useDispatch();
-  // Get tracks from Redux store; assuming a normalized state keyed by id.
   const tracksObj = useSelector((state) => state.tracks);
   const tracksArray = Object.values(tracksObj);
-  
-  // State for current playing track index and audio element.
+
+  // State for current playing track index.
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [audio, setAudio] = useState(null);
+  // Create a ref for the audio element.
+  const audioRef = useRef(null);
+
   // State for file upload.
   const [uploadFile, setUploadFile] = useState(null);
   // State for comment text.
@@ -26,29 +27,19 @@ function MainPage() {
     dispatch(thunkFetchTracks());
   }, [dispatch]);
 
-  // When tracks are loaded, start playing a random track.
+  // Update the audio element source and play whenever the current track changes.
   useEffect(() => {
-    if (tracksArray.length && !audio) {
-      // Randomize the order (here we simply pick a random starting index).
-      const randomIndex = Math.floor(Math.random() * tracksArray.length);
-      setCurrentIndex(randomIndex);
-      const newAudio = new Audio(tracksArray[randomIndex].audio_url);
-      newAudio.play();
-      setAudio(newAudio);
+    if (tracksArray.length > 0 && audioRef.current) {
+      audioRef.current.src = tracksArray[currentIndex].audio_url;
+      audioRef.current.play();
     }
-  }, [tracksArray, audio]);
+  }, [currentIndex, tracksArray]);
 
   // Handler to skip to the next song.
   const handleSkip = () => {
     if (tracksArray.length) {
-      if (audio) {
-        audio.pause();
-      }
       const nextIndex = (currentIndex + 1) % tracksArray.length;
       setCurrentIndex(nextIndex);
-      const newAudio = new Audio(tracksArray[nextIndex].audio_url);
-      newAudio.play();
-      setAudio(newAudio);
     }
   };
 
@@ -63,7 +54,6 @@ function MainPage() {
     if (uploadFile) {
       const formData = new FormData();
       formData.append("audio_file", uploadFile);
-      // In a real app, you’d include additional metadata (title, genre, duration, etc.)
       formData.append("title", "New Track");
       formData.append("genre", "Unknown");
       formData.append("duration", 180);
@@ -78,6 +68,7 @@ function MainPage() {
       await dispatch(thunkLikeTrack(tracksArray[currentIndex].id));
     }
   };
+
   // Handler for unliking the current track.
   const handleUnlike = async () => {
     if (tracksArray[currentIndex]) {
@@ -87,12 +78,9 @@ function MainPage() {
 
   // Handler for adding the current track to a personal playlist.
   const handleAddToPlaylist = async () => {
-    // Here, we assume creating a playlist with the current track.
-    // In a real app, you might select an existing playlist.
     if (tracksArray[currentIndex]) {
       const playlistData = {
         name: "My Playlist",
-        // Additional data can be sent as needed; here we include the track ID.
         trackId: tracksArray[currentIndex].id,
       };
       await dispatch(thunkCreatePlaylist(playlistData));
@@ -106,18 +94,19 @@ function MainPage() {
       setCommentText("");
     }
   };
+
   // Handler for updating a comment.
   const handleUpdateComment = async (commentId) => {
     if (tracksArray[currentIndex] && commentText.trim()) {
       await dispatch(thunkUpdateComment(tracksArray[currentIndex].id, commentId, commentText));
       setCommentText("");
     }
-   };
-   // Handler for deleting a comment.
-   const handleDeleteComment = async (commentId) => {
-    await dispatch(thunkDeleteComment(tracksArray[currentIndex].id, commentId));
   };
 
+  // Handler for deleting a comment.
+  const handleDeleteComment = async (commentId) => {
+    await dispatch(thunkDeleteComment(tracksArray[currentIndex].id, commentId));
+  };
 
   return (
     <div className="main-page">
@@ -144,7 +133,17 @@ function MainPage() {
               </>
             )}
           </div>
-          {/* Upload slot (positioned where a tape deck insert might be) */}
+          {/* Audio player integrated into the UI */}
+          <div className="audio-player">
+            <audio 
+              ref={audioRef} 
+              controls 
+              onEnded={handleSkip}
+            >
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+          {/* Upload slot */}
           <div className="upload-slot">
             <form onSubmit={handleUpload}>
               <input
@@ -178,8 +177,12 @@ function MainPage() {
           <button className="comment-button" onClick={handlePostComment}>
             Post Comment
           </button>
-          <button className="update-comment-button" onClick={handleUpdateComment}>Update Comment </button>
-          <button className="delete-comment-button" onClick={handleDeleteComment}>Delete Comment</button>
+          <button className="update-comment-button" onClick={handleUpdateComment}>
+            Update Comment
+          </button>
+          <button className="delete-comment-button" onClick={handleDeleteComment}>
+            Delete Comment
+          </button>
         </div>
       </div>
     </div>

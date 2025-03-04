@@ -1,163 +1,179 @@
 /* Overall page styles */
 .main-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #222;
-    color: #fff;
-    min-height: 100vh;
-    font-family: 'Arial', sans-serif;
-  }
-  
-  /* Header banner styling */
-  .boom-box-header {
-    background: linear-gradient(90deg, #ffea00, #ff8c00);
-    width: 100%;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-  }
-  
-  .logo-banner {
-    font-size: 3rem;
-    margin: 0;
-    letter-spacing: 5px;
-    font-family: 'Courier New', Courier, monospace;
-  }
-  
-  /* Boom box body styling */
-  .boom-box-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #444;
-    width: 90%;
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 5px solid #888;
-    border-radius: 10px;
-    position: relative;
-  }
-  
-  /* Speaker styling */
-  .speaker {
-    width: 150px;
-    height: 150px;
-    background: #333;
-    border: 5px solid #ffea00;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .left-speaker {
-    margin-right: 20px;
-  }
-  
-  .right-speaker {
-    margin-left: 20px;
-  }
-  
-  /* Spinning lemon graphic; update the URL to your lemon image */
-  .spinning-lemons {
-    width: 100px;
-    height: 100px;
-    background: url('/path/to/lemon.png') no-repeat center center;
-    background-size: contain;
-    animation: spin 5s linear infinite;
-  }
-  
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  
-  /* Tape deck area styling */
-  .tape-deck {
-    flex: 1;
-    background: #555;
-    padding: 20px;
-    border: 3px solid #ff8c00;
-    border-radius: 5px;
-    text-align: center;
-    position: relative;
-  }
-  
-  .skip-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #ffea00;
-    border: none;
-    padding: 10px 20px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .song-info {
-    margin-top: 40px;
-  }
-  
-  /* Upload slot styling (positioned roughly 2/3 down the tape deck) */
-  .upload-slot {
-    margin-top: 40%;
-    padding: 10px;
-    background: #666;
-    border: 2px dashed #ff8c00;
-    border-radius: 5px;
-  }
-  
-  .upload-slot input[type="file"] {
-    color: #fff;
-    background: transparent;
-    border: none;
-    margin-bottom: 10px;
-  }
-  
-  .upload-slot button {
-    background: #ff8c00;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-  
-  /* Controls below the boom box */
-  .controls {
-    width: 90%;
-    max-width: 1000px;
-    margin: 20px auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .like-button, .add-to-playlist-button, .comment-button {
-    background: #ffea00;
-    border: none;
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-  
-  .comments-section {
-    width: 100%;
-    max-width: 500px;
-    margin-top: 20px;
-  }
-  
-  .comments-section textarea {
-    width: 100%;
-    height: 80px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 2px solid #888;
-    resize: none;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #222;
+  color: #fff;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Header banner styling */
+.boom-box-header {
+  background: linear-gradient(90deg, #ffea00, #ff8c00);
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.logo-banner {
+  font-size: 3rem;
+  margin: 0;
+  letter-spacing: 5px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Boom box body styling */
+.boom-box-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #444;
+  width: 90%;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 5px solid #888;
+  border-radius: 10px;
+  position: relative;
+}
+
+/* Speaker styling */
+.speaker {
+  width: 150px;
+  height: 150px;
+  background: #333;
+  border: 5px solid #ffea00;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.left-speaker {
+  margin-right: 20px;
+}
+
+.right-speaker {
+  margin-left: 20px;
+}
+
+/* Spinning lemon graphic; update the URL to your lemon image */
+.spinning-lemons {
+  width: 100px;
+  height: 100px;
+  background: url('/path/to/lemon.png') no-repeat center center;
+  background-size: contain;
+  animation: spin 5s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Tape deck area styling */
+.tape-deck {
+  flex: 1;
+  background: #555;
+  padding: 20px;
+  border: 3px solid #ff8c00;
+  border-radius: 5px;
+  text-align: center;
+  position: relative;
+}
+
+.skip-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ffea00;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.song-info {
+  margin-top: 40px;
+}
+
+/* Upload slot styling (positioned roughly 2/3 down the tape deck) */
+.upload-slot {
+  margin-top: 40%;
+  padding: 10px;
+  background: #666;
+  border: 2px dashed #ff8c00;
+  border-radius: 5px;
+}
+
+.upload-slot input[type="file"] {
+  color: #fff;
+  background: transparent;
+  border: none;
+  margin-bottom: 10px;
+}
+
+.upload-slot button {
+  background: #ff8c00;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* Controls below the boom box */
+.controls {
+  width: 90%;
+  max-width: 1000px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.like-button, .add-to-playlist-button, .comment-button {
+  background: #ffea00;
+  border: none;
+  padding: 10px 20px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.comments-section {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+.comments-section textarea {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 2px solid #888;
+  resize: none;
+}
+
+/* Audio player styling */
+.audio-player {
+  margin-top: 20px;
+  background: #333;
+  padding: 10px;
+  border: 2px solid #ff8c00;
+  border-radius: 5px;
+}
+
+.audio-player audio {
+  width: 100%;
+  outline: none;
+  border-radius: 5px;
+  /* Some browsers have limited custom styling for native controls,
+     so this mainly ensures the container styling remains consistent */
+}
