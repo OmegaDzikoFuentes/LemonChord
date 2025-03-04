@@ -19,7 +19,7 @@ class Config:
     
     # AWS S3 Configuration
     USE_S3 = os.environ.get('USE_S3', 'False') == 'True'
-    AWS_ACCESS_KEY = os.environ.get('S3_KEY')
-    AWS_SECRET_KEY = os.environ.get('S3_SECRET')
-    AWS_REGION = os.environ.get('S3_REGION', 'us-east-2')
+    S3_KEY = os.environ.get('S3_KEY')
+    S3_SECRET = os.environ.get('S3_SECRET')
+    S3_REGION = os.environ.get('S3_REGION', 'us-east-2')
     S3_BUCKET = os.environ.get('S3_BUCKET')

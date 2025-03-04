@@ -97,9 +97,8 @@ def create_track():
         validate_file_extension(audio_file.filename, ALLOWED_EXTENSIONS)
         validate_file_size(audio_file, max_size_mb=MAX_CONTENT_LENGTH//(1024*1024))
         
-        # Generate a secure, unique filename
-        original_filename = secure_filename(audio_file.filename)
-        unique_filename = generate_unique_filename(original_filename)
+        # Generate a secure, unique filename using the original filename for extension extraction
+        unique_filename = generate_unique_filename(secure_filename(audio_file.filename))
         
         # Store file (S3 or local)
         if current_app.config.get('USE_S3', False):
@@ -112,14 +111,13 @@ def create_track():
             audio_file.save(file_path)
             file_url = file_path
 
-        # Create new track record
+        # Create new track record without original_filename
         new_track = Track(
             title=title,
             audio_url=file_url,
             genre=genre,
             duration=duration,
-            user_id=current_user.id,
-            original_filename=original_filename
+            user_id=current_user.id
         )
         
         db.session.add(new_track)
@@ -156,8 +154,7 @@ def upload_track_form():
             # but we still check file size.)
             validate_file_size(audio_file, max_size_mb=MAX_CONTENT_LENGTH//(1024*1024))
 
-            original_filename = secure_filename(audio_file.filename)
-            unique_filename = generate_unique_filename(original_filename)
+            unique_filename = generate_unique_filename(secure_filename(audio_file.filename))
             
             if current_app.config.get('USE_S3', False):
                 file_url = upload_file_to_s3(audio_file, unique_filename)
@@ -173,8 +170,7 @@ def upload_track_form():
                 audio_url=file_url,
                 genre=genre,
                 duration=duration,
-                user_id=current_user.id,
-                original_filename=original_filename
+                user_id=current_user.id
             )
             db.session.add(new_track)
             db.session.commit()
@@ -213,8 +209,7 @@ def update_track(track_id):
                 audio_file = request.files['audio_file']
                 validate_file_extension(audio_file.filename, ALLOWED_EXTENSIONS)
                 validate_file_size(audio_file, max_size_mb=MAX_CONTENT_LENGTH//(1024*1024))
-                original_filename = secure_filename(audio_file.filename)
-                unique_filename = generate_unique_filename(original_filename)
+                unique_filename = generate_unique_filename(secure_filename(audio_file.filename))
                 old_file_url = track.audio_url
                 if current_app.config.get('USE_S3', False):
                     file_url = upload_file_to_s3(audio_file, unique_filename)
@@ -225,7 +220,6 @@ def update_track(track_id):
                     audio_file.save(file_path)
                     file_url = file_path
                 track.audio_url = file_url
-                track.original_filename = original_filename
         else:
             data = request.get_json() or {}
             if 'title' in data:

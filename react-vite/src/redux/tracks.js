@@ -36,10 +36,10 @@ export const thunkFetchTracks = (
   if (genre) url += `&genre=${genre}`;
   const response = await fetch(url);
   if (response.ok) {
-    const data = await response.json();
-    // Assuming data.tracks contains an array of track objects.
-    dispatch(loadTracks(data.tracks));
-    return data;
+    const responseData = await response.json();
+    
+    dispatch(loadTracks(responseData.data));
+    return responseData;
   }
 };
 
@@ -50,7 +50,8 @@ export const thunkCreateTrack = (formData) => async (dispatch) => {
     body: formData
   });
   
-  const newTrack = await response.json();
+  const responseData = await response.json();
+  const newTrack = responseData.data;
   dispatch(addTrack(newTrack));
   return newTrack;
 };
