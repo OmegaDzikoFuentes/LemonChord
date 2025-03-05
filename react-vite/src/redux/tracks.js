@@ -32,7 +32,7 @@ export const thunkFetchTracks = (
   sort_by = 'created_at',
   genre = null
 ) => async (dispatch) => {
-  let url = `/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}/`;
+  let url = `/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
   if (genre) url += `&genre=${genre}`;
   const response = await fetch(url);
   if (response.ok) {
@@ -69,6 +69,18 @@ export const thunkUpdateTrack = (trackId, formData) => async (dispatch) => {
     return updatedTrack;
   }
 };
+
+// Thunk: Fetch tracks for the current user
+export const thunkFetchUserTracks = () => async (dispatch) => {
+  const response = await fetch('/api/tracks/user');
+  if (response.ok) {
+    const responseData = await response.json();
+    // Expecting responseData.data.tracks to be an array of tracks
+    dispatch(loadTracks(responseData.data.tracks));
+    return responseData;
+  }
+};
+
 
 // Thunk: Delete a track
 export const thunkDeleteTrack = (trackId) => async (dispatch) => {

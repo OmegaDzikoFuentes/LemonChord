@@ -187,6 +187,14 @@ def upload_track_form():
 def get_track(track_id):
     track = Track.query.get_or_404(track_id)
     return api_success(track.to_dict())
+@tracks_routes.route('/user', methods=['GET'])
+@login_required
+def get_user_tracks():
+    user_tracks = Track.query.filter_by(user_id=current_user.id)\
+                     .order_by(Track.created_at.desc()).all()
+    tracks_data = [track.to_dict() for track in user_tracks]
+    return api_success(data={'tracks': tracks_data})
+
 
 # Route to update track information
 @tracks_routes.route('/<int:track_id>', methods=['PUT', 'PATCH'])

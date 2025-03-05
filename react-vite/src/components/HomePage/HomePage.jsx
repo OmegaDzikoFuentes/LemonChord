@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { thunkFetchTracks, thunkCreateTrack } from "../../redux/tracks";
+import { thunkFetchUserTracks, thunkCreateTrack } from "../../redux/tracks";
 import { thunkCreatePlaylist } from "../../redux/playlists";
 import "./HomePage.css";
 
@@ -31,10 +31,11 @@ function HomePage() {
   const [uploadGenre, setUploadGenre] = useState("");
   const [uploadDuration, setUploadDuration] = useState("");
 
-  // Fetch tracks on mount
-  useEffect(() => {
-    dispatch(thunkFetchTracks());
-  }, [dispatch]);
+  // Fetch tracks on component mount
+useEffect(() => {
+  // Fetch only the current user's tracks
+  dispatch(thunkFetchUserTracks());
+}, [dispatch]);
 
   const handleFileChange = (e) => {
     setUploadFile(e.target.files[0]);
