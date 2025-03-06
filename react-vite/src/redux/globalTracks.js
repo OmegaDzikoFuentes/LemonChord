@@ -36,7 +36,7 @@ export const thunkFetchGlobalTracks = (
 ) => async (dispatch) => {
   try {
     // Fix: Add the /api prefix to match your backend route structure
-    let url = `/api/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
+    let url = `/api/playlist/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
     if (genre) url += `&genre=${genre}`;
     
     const response = await fetch(url);

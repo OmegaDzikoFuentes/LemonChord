@@ -12,7 +12,7 @@ function MainPage() {
   const tracksObj = useSelector((state) => state.globalTracks);
   const tracksArray = Object.values(tracksObj);
   console.log("tracksArray:", tracksArray);
-  console.log("tracksObj:", tracksObj);
+  console.log("tracksObj:sssttttaaaatteeeee", tracksObj);
   console.log("tracksArray:ssoooonnnggg", tracksArray[0]);
 
   // State for current playing track index.
