@@ -1,48 +1,29 @@
 // Action Types
-const LOAD_TRACKS = 'tracks/loadTracks';
-const ADD_TRACK = 'tracks/addTrack';
-const UPDATE_TRACK = 'tracks/updateTrack';
-const REMOVE_TRACK = 'tracks/removeTrack';
+const LOAD_USER_TRACKS = 'userTracks/loadTracks';
+const ADD_USER_TRACK = 'userTracks/addTrack';
+const UPDATE_USER_TRACK = 'userTracks/updateTrack';
+const REMOVE_USER_TRACK = 'userTracks/removeTrack';
 
 // Action Creators
-const loadTracks = (tracks) => ({
-  type: LOAD_TRACKS,
+const loadUserTracks = (tracks) => ({
+  type: LOAD_USER_TRACKS,
   payload: tracks
 });
 
-const addTrack = (track) => ({
-  type: ADD_TRACK,
+const addUserTrack = (track) => ({
+  type: ADD_USER_TRACK,
   payload: track
 });
 
-const updateTrack = (track) => ({
-  type: UPDATE_TRACK,
+const updateUserTrack = (track) => ({
+  type: UPDATE_USER_TRACK,
   payload: track
 });
 
-const removeTrack = (trackId) => ({
-  type: REMOVE_TRACK,
+const removeUserTrack = (trackId) => ({
+  type: REMOVE_USER_TRACK,
   payload: trackId
 });
-
-// Thunk: Fetch tracks from the ultimate_playlist endpoint
-export const thunkFetchTracks = (
-  page = 1,
-  per_page = 10,
-  sort_by = 'created_at',
-  genre = null
-) => async (dispatch) => {
-  let url = `/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
-  if (genre) url += `&genre=${genre}`;
-  const response = await fetch(url);
-  if (response.ok) {
-    const responseData = await response.json();
-    // Adjusting for the new structure from ultimate_playlist endpoint
-    dispatch(loadTracks(responseData.data.tracks));
-    return responseData;
-  }
-};
-
 
 // Thunk: Create a new track (for file uploads, formData is expected)
 export const thunkCreateTrack = (formData) => async (dispatch) => {
@@ -53,7 +34,7 @@ export const thunkCreateTrack = (formData) => async (dispatch) => {
   
   const responseData = await response.json();
   const newTrack = responseData.data;
-  dispatch(addTrack(newTrack));
+  dispatch(addUserTrack(newTrack));
   return newTrack;
 };
 
@@ -65,7 +46,7 @@ export const thunkUpdateTrack = (trackId, formData) => async (dispatch) => {
   });
   if (response.ok) {
     const updatedTrack = await response.json();
-    dispatch(updateTrack(updatedTrack));
+    dispatch(updateUserTrack(updatedTrack));
     return updatedTrack;
   }
 };
@@ -76,11 +57,10 @@ export const thunkFetchUserTracks = () => async (dispatch) => {
   if (response.ok) {
     const responseData = await response.json();
     // Expecting responseData.data.tracks to be an array of tracks
-    dispatch(loadTracks(responseData.data.tracks));
+    dispatch(loadUserTracks(responseData.data.tracks));
     return responseData;
   }
 };
-
 
 // Thunk: Delete a track
 export const thunkDeleteTrack = (trackId) => async (dispatch) => {
@@ -88,28 +68,28 @@ export const thunkDeleteTrack = (trackId) => async (dispatch) => {
     method: 'DELETE'
   });
   if (response.ok) {
-    dispatch(removeTrack(trackId));
+    dispatch(removeUserTrack(trackId));
   }
 };
 
 // Initial State
 const initialState = {};
 
-// Reducer: Normalize the tracks into an object keyed by track ID
-const tracksReducer = (state = initialState, action) => {
+// Reducer: Normalize the user tracks into an object keyed by track ID
+const userTracksReducer = (state = initialState, action) => {
   switch (action.type) {
-    case LOAD_TRACKS: {
+    case LOAD_USER_TRACKS: {
       const newState = {};
       action.payload.forEach((track) => {
         newState[track.id] = track;
       });
       return newState;
     }
-    case ADD_TRACK:
-    case UPDATE_TRACK: {
+    case ADD_USER_TRACK:
+    case UPDATE_USER_TRACK: {
       return { ...state, [action.payload.id]: action.payload };
     }
-    case REMOVE_TRACK: {
+    case REMOVE_USER_TRACK: {
       const newState = { ...state };
       delete newState[action.payload];
       return newState;
@@ -119,4 +99,4 @@ const tracksReducer = (state = initialState, action) => {
   }
 };
 
-export default tracksReducer;
+export default userTracksReducer;

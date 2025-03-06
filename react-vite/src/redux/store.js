@@ -6,14 +6,16 @@ import {
 } from "redux";
 import thunk from "redux-thunk";
 import sessionReducer from "./session";
-import tracksReducer from "./tracks";
+import globalTracksReducer from "./globalTracks";
+import userTracksReducer from "./userTracks";
 import playlistsReducer from "./playlists";
 import commentsReducer from "./comments";
 import likesReducer from "./likes";
 
 const rootReducer = combineReducers({
   session: sessionReducer,
-  tracks: tracksReducer,
+  globalTracks: globalTracksReducer,
+  userTracks: userTracksReducer,
   playlists: playlistsReducer,
   comments: commentsReducer,
   likes: likesReducer,

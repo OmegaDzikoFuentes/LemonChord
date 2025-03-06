@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { thunkFetchUserTracks, thunkCreateTrack } from "../../redux/tracks";
+import { thunkFetchUserTracks, thunkCreateTrack, thunkUpdateTrack, thunkDeleteTrack } from "../../redux/userTracks";
 import { thunkCreatePlaylist } from "../../redux/playlists";
 import { thunkAuthenticate } from "../../redux/session";
 import "./HomePage.css";
@@ -8,45 +8,33 @@ import "./HomePage.css";
 function HomePage() {
   const dispatch = useDispatch();
   const sessionUser = useSelector((state) => state.session.user);
-  const tracksObj = useSelector((state) => state.tracks);
-  // Convert tracksObj to an array
+  const tracksObj = useSelector((state) => state.userTracks); // using userTracks slice
   const tracksArray = Object.values(tracksObj);
-  // Filter to get only the tracks uploaded by the current user
-  const userTracks = sessionUser
-    ? tracksArray.filter(
-        (track) => (track.user_id) === (sessionUser.data.id)
-      )
-    : [];
-    console.log("track id", tracksArray[0]);
-    console.log("session user id", sessionUser);
   
-
-    
-  // Get playlists and filter by current user
-  const playlistsObj = useSelector((state) => state.playlists);
-  const userPlaylists = sessionUser
-    ? Object.values(playlistsObj).filter(
-        (playlist) => playlist.user_id === sessionUser.id
-      )
-    : [];
-
   // Local state for upload form
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadGenre, setUploadGenre] = useState("");
   const [uploadDuration, setUploadDuration] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-// Fetch user data on component mount
+  // State for editing a track
+  const [editingTrackId, setEditingTrackId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editGenre, setEditGenre] = useState("");
+  const [editDuration, setEditDuration] = useState("");
+
+  // Fetch session data on component mount
   useEffect(() => {
     dispatch(thunkAuthenticate());
   }, [dispatch]);
 
-// Fetch tracks only once the sessionUser is loaded
-useEffect(() => {
-  if (sessionUser) {
-    dispatch(thunkFetchUserTracks());
-  }
-}, [dispatch, sessionUser]);
+  // Fetch tracks only once the sessionUser is loaded
+  useEffect(() => {
+    if (sessionUser) {
+      dispatch(thunkFetchUserTracks());
+    }
+  }, [dispatch, sessionUser]);
 
   const handleFileChange = (e) => {
     setUploadFile(e.target.files[0]);
@@ -55,13 +43,26 @@ useEffect(() => {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (uploadFile) {
+      // Simulate progress (in production, use XHR/Axios for real progress events)
+      setUploadProgress(10);
       const formData = new FormData();
       formData.append("audio_file", uploadFile);
       formData.append("title", uploadTitle || "New Track");
       formData.append("genre", uploadGenre || "Unknown");
       formData.append("duration", uploadDuration || 180);
+
+      // Simulate progress update over 1.5 seconds
+      setTimeout(() => setUploadProgress(50), 500);
+      setTimeout(() => setUploadProgress(80), 1000);
+
       await dispatch(thunkCreateTrack(formData));
-      // Clear form fields after upload
+      
+      // When done, reset fields and progress
+      setUploadProgress(100);
+      setTimeout(() => {
+        setUploadProgress(0);
+      }, 500);
+      
       setUploadFile(null);
       setUploadTitle("");
       setUploadGenre("");
@@ -69,8 +70,34 @@ useEffect(() => {
     }
   };
 
+  const handleDelete = (trackId) => {
+    dispatch(thunkDeleteTrack(trackId));
+  };
+
+  const startEditing = (track) => {
+    setEditingTrackId(track.id);
+    setEditTitle(track.title);
+    setEditGenre(track.genre);
+    setEditDuration(track.duration);
+  };
+
+  const cancelEditing = () => {
+    setEditingTrackId(null);
+    setEditTitle("");
+    setEditGenre("");
+    setEditDuration("");
+  };
+
+  const handleUpdate = async (trackId) => {
+    const formData = new FormData();
+    formData.append("title", editTitle);
+    formData.append("genre", editGenre);
+    formData.append("duration", editDuration);
+    await dispatch(thunkUpdateTrack(trackId, formData));
+    cancelEditing();
+  };
+
   const handleCreatePlaylist = async () => {
-    // For simplicity, create a new playlist with a default name.
     const playlistData = { name: "My Playlist" };
     await dispatch(thunkCreatePlaylist(playlistData));
   };
@@ -86,15 +113,7 @@ useEffect(() => {
         <h2>My Playlists</h2>
         {sessionUser ? (
           <>
-            {userPlaylists.length ? (
-              <ul>
-                {userPlaylists.map((pl) => (
-                  <li key={pl.id}>{pl.name}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>You have not created any playlists yet.</p>
-            )}
+            {/* Render playlists... */}
             <button onClick={handleCreatePlaylist}>Create New Playlist</button>
           </>
         ) : (
@@ -144,6 +163,14 @@ useEffect(() => {
               />
             </div>
             <button type="submit">Upload Song</button>
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="progress-bar">
+                <div
+                  className="progress-bar-fill"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            )}
           </form>
         ) : (
           <p>Sign in to upload your songs.</p>
@@ -154,17 +181,41 @@ useEffect(() => {
       <section className="user-songs-section">
         <h2>My Songs</h2>
         {sessionUser ? (
-          userTracks.length ? (
+          tracksArray.length ? (
             <ul>
-              {userTracks.map((track) => (
+              {tracksArray.map((track) => (
                 <li key={track.id}>
                   <div>
                     <strong>{track.title}</strong> – {track.genre}
                   </div>
-                  {/* Audio player for each track */}
                   <audio controls src={track.audio_url}>
                     Your browser does not support the audio element.
                   </audio>
+                  <div className="track-controls">
+                    <button onClick={() => handleDelete(track.id)}>Delete</button>
+                    <button onClick={() => startEditing(track)}>Update</button>
+                  </div>
+                  {editingTrackId === track.id && (
+                    <div className="update-form">
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        value={editGenre}
+                        onChange={(e) => setEditGenre(e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        value={editDuration}
+                        onChange={(e) => setEditDuration(e.target.value)}
+                      />
+                      <button onClick={() => handleUpdate(track.id)}>Submit Update</button>
+                      <button onClick={cancelEditing}>Cancel</button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
