@@ -11,6 +11,9 @@ function MainPage() {
   const dispatch = useDispatch();
   const tracksObj = useSelector((state) => state.globalTracks);
   const tracksArray = Object.values(tracksObj);
+  console.log("tracksArray:", tracksArray);
+  console.log("tracksObj:", tracksObj);
+  console.log("tracksArray:ssoooonnnggg", tracksArray[0]);
 
   // State for current playing track index.
   const [currentIndex, setCurrentIndex] = useState(0);

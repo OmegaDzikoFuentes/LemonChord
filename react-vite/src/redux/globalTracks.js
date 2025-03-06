@@ -34,13 +34,26 @@ export const thunkFetchGlobalTracks = (
   sort_by = 'created_at',
   genre = null
 ) => async (dispatch) => {
-  let url = `/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
-  if (genre) url += `&genre=${genre}`;
-  const response = await fetch(url);
-  if (response.ok) {
+  try {
+    // Fix: Add the /api prefix to match your backend route structure
+    let url = `/api/ultimate_playlist?page=${page}&per_page=${per_page}&sort_by=${sort_by}`;
+    if (genre) url += `&genre=${genre}`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      // Handle non-200 responses
+      const errorText = await response.text();
+      console.error(`Error fetching tracks: ${response.status} ${response.statusText}`, errorText);
+      return;
+    }
+    
     const responseData = await response.json();
+    console.log("Tracks fetched successfully:", responseData);
     dispatch(loadGlobalTracks(responseData.data.tracks));
     return responseData;
+  } catch (error) {
+    console.error("Failed to fetch tracks:", error);
   }
 };
 
@@ -51,6 +64,12 @@ const initialState = {};
 const globalTracksReducer = (state = initialState, action) => {
   switch (action.type) {
     case LOAD_GLOBAL_TRACKS: {
+      // Check if action.payload is defined and is an array
+      if (!action.payload || !Array.isArray(action.payload)) {
+        console.error("Invalid payload in LOAD_GLOBAL_TRACKS:", action.payload);
+        return state;
+      }
+      
       const newState = {};
       action.payload.forEach((track) => {
         newState[track.id] = track;

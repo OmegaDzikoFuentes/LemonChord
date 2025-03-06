@@ -177,3 +177,18 @@
   /* Some browsers have limited custom styling for native controls,
      so this mainly ensures the container styling remains consistent */
 }
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #333;
+  border-radius: 5px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffea00, #ff8c00); /* Matches your color scheme */
+  transition: width 0.3s ease-out;
+}
