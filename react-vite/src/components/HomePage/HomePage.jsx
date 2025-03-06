@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkFetchUserTracks, thunkCreateTrack } from "../../redux/tracks";
 import { thunkCreatePlaylist } from "../../redux/playlists";
+import { thunkAuthenticate } from "../../redux/session";
 import "./HomePage.css";
 
 function HomePage() {
@@ -13,10 +14,14 @@ function HomePage() {
   // Filter to get only the tracks uploaded by the current user
   const userTracks = sessionUser
     ? tracksArray.filter(
-        (track) => Number(track.user_id) === Number(sessionUser.id)
+        (track) => (track.user_id) === (sessionUser.data.id)
       )
     : [];
+    console.log("track id", tracksArray[0]);
+    console.log("session user id", sessionUser);
   
+
+    
   // Get playlists and filter by current user
   const playlistsObj = useSelector((state) => state.playlists);
   const userPlaylists = sessionUser
@@ -31,11 +36,17 @@ function HomePage() {
   const [uploadGenre, setUploadGenre] = useState("");
   const [uploadDuration, setUploadDuration] = useState("");
 
-  // Fetch tracks on component mount
+// Fetch user data on component mount
+  useEffect(() => {
+    dispatch(thunkAuthenticate());
+  }, [dispatch]);
+
+// Fetch tracks only once the sessionUser is loaded
 useEffect(() => {
-  // Fetch only the current user's tracks
-  dispatch(thunkFetchUserTracks());
-}, [dispatch]);
+  if (sessionUser) {
+    dispatch(thunkFetchUserTracks());
+  }
+}, [dispatch, sessionUser]);
 
   const handleFileChange = (e) => {
     setUploadFile(e.target.files[0]);
