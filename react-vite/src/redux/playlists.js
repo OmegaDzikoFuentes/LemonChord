@@ -15,22 +15,9 @@ const addPlaylist = (playlist) => ({
   payload: playlist
 });
 
-
-// commented out to avoid unused variable errors.
-
-// const updatePlaylist = (playlist) => ({
-//   type: UPDATE_PLAYLIST,
-//   payload: playlist
-// });
-
-// const removePlaylist = (playlistId) => ({
-//   type: REMOVE_PLAYLIST,
-//   payload: playlistId
-// });
-
-// Thunks 
+// Thunk: Fetch playlists
 export const thunkFetchPlaylists = () => async (dispatch) => {
-  const response = await fetch('/api/playlists/');
+  const response = await fetch('/api/playlist/');
   if (response.ok) {
     const data = await response.json();
     dispatch(loadPlaylists(data.playlists));
@@ -38,8 +25,9 @@ export const thunkFetchPlaylists = () => async (dispatch) => {
   }
 };
 
+// Thunk: Create a new playlist
 export const thunkCreatePlaylist = (playlistData) => async (dispatch) => {
-  const response = await fetch('/api/playlists/', {
+  const response = await fetch('/api/playlist/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(playlistData)

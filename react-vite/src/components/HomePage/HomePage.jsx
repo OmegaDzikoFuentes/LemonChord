@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { thunkFetchUserTracks, thunkCreateTrack, thunkUpdateTrack, thunkDeleteTrack } from "../../redux/userTracks";
+import {
+  thunkFetchUserTracks,
+  thunkCreateTrack,
+  thunkUpdateTrack,
+  thunkDeleteTrack
+} from "../../redux/userTracks";
 import { thunkCreatePlaylist } from "../../redux/playlists";
 import { thunkAuthenticate } from "../../redux/session";
 import "./HomePage.css";
@@ -8,8 +13,10 @@ import "./HomePage.css";
 function HomePage() {
   const dispatch = useDispatch();
   const sessionUser = useSelector((state) => state.session.user);
-  const tracksObj = useSelector((state) => state.userTracks); // using userTracks slice
+  const tracksObj = useSelector((state) => state.userTracks);
+  const playlistsObj = useSelector((state) => state.playlists);
   const tracksArray = Object.values(tracksObj);
+  const playlistsArray = Object.values(playlistsObj);
   
   // Local state for upload form
   const [uploadFile, setUploadFile] = useState(null);
@@ -24,12 +31,11 @@ function HomePage() {
   const [editGenre, setEditGenre] = useState("");
   const [editDuration, setEditDuration] = useState("");
 
-  // Fetch session data on component mount
+  // Fetch session and user tracks on component mount.
   useEffect(() => {
     dispatch(thunkAuthenticate());
   }, [dispatch]);
 
-  // Fetch tracks only once the sessionUser is loaded
   useEffect(() => {
     if (sessionUser) {
       dispatch(thunkFetchUserTracks());
@@ -43,7 +49,6 @@ function HomePage() {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (uploadFile) {
-      // Simulate progress (in production, use XHR/Axios for real progress events)
       setUploadProgress(10);
       const formData = new FormData();
       formData.append("audio_file", uploadFile);
@@ -51,17 +56,13 @@ function HomePage() {
       formData.append("genre", uploadGenre || "Unknown");
       formData.append("duration", uploadDuration || 180);
 
-      // Simulate progress update over 1.5 seconds
       setTimeout(() => setUploadProgress(50), 500);
       setTimeout(() => setUploadProgress(80), 1000);
 
       await dispatch(thunkCreateTrack(formData));
       
-      // When done, reset fields and progress
       setUploadProgress(100);
-      setTimeout(() => {
-        setUploadProgress(0);
-      }, 500);
+      setTimeout(() => setUploadProgress(0), 500);
       
       setUploadFile(null);
       setUploadTitle("");
@@ -107,13 +108,21 @@ function HomePage() {
       <header className="home-header">
         <h1>Welcome to LemonChord</h1>
       </header>
-
+      
       {/* My Playlists Section */}
       <section className="playlist-section">
         <h2>My Playlists</h2>
         {sessionUser ? (
           <>
-            {/* Render playlists... */}
+            {playlistsArray.length > 0 ? (
+              <ul>
+                {playlistsArray.map(pl => (
+                  <li key={pl.id}>{pl.name}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No playlists yet.</p>
+            )}
             <button onClick={handleCreatePlaylist}>Create New Playlist</button>
           </>
         ) : (

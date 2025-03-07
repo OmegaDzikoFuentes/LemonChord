@@ -1,20 +1,25 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkFetchGlobalTracks } from "../../redux/globalTracks";
-import { thunkCreateTrack } from "../../redux/userTracks";
+import { thunkCreateTrack } from "../../redux/userTracks"; // for uploading a track globally
 import { thunkLikeTrack, thunkUnlikeTrack } from "../../redux/likes";
-import { thunkCreateComment, thunkUpdateComment, thunkDeleteComment } from "../../redux/comments";
+import { 
+  thunkFetchComments,
+  thunkCreateComment, 
+  thunkUpdateComment, 
+  thunkDeleteComment 
+} from "../../redux/comments";
 import { thunkCreatePlaylist } from "../../redux/playlists";
 import "./MainPlaylist.css";
 
 function MainPage() {
   const dispatch = useDispatch();
   const tracksObj = useSelector((state) => state.globalTracks);
+  const commentsObj = useSelector((state) => state.comments);
+  const likes = useSelector((state) => state.likes);
+  const playlistsObj = useSelector((state) => state.playlists);
   const tracksArray = Object.values(tracksObj);
-  console.log("tracksArray:", tracksArray);
-  console.log("tracksObj:sssttttaaaatteeeee", tracksObj);
-  console.log("tracksArray:ssoooonnnggg", tracksArray[0]);
-
+  
   // State for current playing track index.
   const [currentIndex, setCurrentIndex] = useState(0);
   const audioRef = useRef(null);
@@ -27,14 +32,23 @@ function MainPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showUploadForm, setShowUploadForm] = useState(false);
 
-  // Other states (commentText, etc.) remain as before
+  // Comment state
   const [commentText, setCommentText] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
 
   // Fetch global tracks on component mount.
   useEffect(() => {
     dispatch(thunkFetchGlobalTracks());
   }, [dispatch]);
 
+  // Fetch comments for the current track whenever it changes.
+  useEffect(() => {
+    if (tracksArray.length > 0) {
+      dispatch(thunkFetchComments(tracksArray[currentIndex].id));
+    }
+  }, [dispatch, currentIndex, tracksArray]);
+
+  // Update audio element source when the current track changes.
   useEffect(() => {
     if (tracksArray.length > 0 && audioRef.current) {
       audioRef.current.src = tracksArray[currentIndex].audio_url;
@@ -63,6 +77,7 @@ function MainPage() {
       formData.append("genre", uploadGenre || "Unknown");
       formData.append("duration", uploadDuration || 180);
 
+      // Simulate upload progress.
       setTimeout(() => setUploadProgress(50), 500);
       setTimeout(() => setUploadProgress(80), 1000);
 
@@ -75,12 +90,10 @@ function MainPage() {
       setUploadTitle("");
       setUploadGenre("");
       setUploadDuration("");
-      // Optionally, hide the form after upload
       setShowUploadForm(false);
     }
   };
 
-  // Handlers for like, comment, add to playlist, etc. remain unchanged.
   const handleLike = async () => {
     if (tracksArray[currentIndex]) {
       await dispatch(thunkLikeTrack(tracksArray[currentIndex].id));
@@ -105,21 +118,31 @@ function MainPage() {
 
   const handlePostComment = async () => {
     if (tracksArray[currentIndex] && commentText.trim()) {
-      await dispatch(thunkCreateComment(tracksArray[currentIndex].id, commentText));
+      if (editingCommentId) {
+        // Update existing comment.
+        await dispatch(thunkUpdateComment(editingCommentId, commentText));
+        setEditingCommentId(null);
+      } else {
+        // Create new comment.
+        await dispatch(thunkCreateComment(tracksArray[currentIndex].id, commentText));
+      }
       setCommentText("");
     }
   };
 
-  const handleUpdateComment = async (commentId) => {
-    if (tracksArray[currentIndex] && commentText.trim()) {
-      await dispatch(thunkUpdateComment(tracksArray[currentIndex].id, commentId, commentText));
-      setCommentText("");
-    }
+  const handleEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setCommentText(comment.text);
   };
 
   const handleDeleteComment = async (commentId) => {
-    await dispatch(thunkDeleteComment(tracksArray[currentIndex].id, commentId));
+    await dispatch(thunkDeleteComment(commentId));
   };
+
+  // Filter comments for the current track.
+  const currentTrackComments = Object.values(commentsObj).filter(
+    comment => tracksArray[currentIndex] && comment.track_id === tracksArray[currentIndex].id
+  );
 
   return (
     <div className="main-page">
@@ -131,9 +154,7 @@ function MainPage() {
           <div className="spinning-lemons"></div>
         </div>
         <div className="tape-deck">
-          <button className="skip-button" onClick={handleSkip}>
-            Skip
-          </button>
+          <button className="skip-button" onClick={handleSkip}>Skip</button>
           <div className="song-info">
             {tracksArray[currentIndex] && (
               <>
@@ -153,11 +174,7 @@ function MainPage() {
           {showUploadForm && (
             <div className="upload-slot">
               <form onSubmit={handleUpload}>
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleFileChange}
-                />
+                <input type="file" accept="audio/*" onChange={handleFileChange} />
                 <div>
                   <label htmlFor="title-upload">Title:</label>
                   <input
@@ -188,10 +205,7 @@ function MainPage() {
                 <button type="submit">Upload Your Track</button>
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <div className="progress-bar">
-                    <div
-                      className="progress-bar-fill"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
+                    <div className="progress-bar-fill" style={{ width: `${uploadProgress}%` }}></div>
                   </div>
                 )}
               </form>
@@ -203,26 +217,56 @@ function MainPage() {
         </div>
       </div>
       <div className="controls">
-        <button className="like-button" onClick={handleLike}>Like</button>
-        <button className="unlike-button" onClick={handleUnlike}>Unlike</button>
+        <button className="like-button" onClick={handleLike}>
+          {likes[tracksArray[currentIndex]?.id] ? "Unlike" : "Like"}
+        </button>
         <button className="add-to-playlist-button" onClick={handleAddToPlaylist}>
           Add to My Playlist
         </button>
         <div className="comments-section">
           <textarea
-            placeholder="Add a comment..."
+            placeholder={editingCommentId ? "Edit your comment..." : "Add a comment..."}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
           ></textarea>
           <button className="comment-button" onClick={handlePostComment}>
-            Post Comment
+            {editingCommentId ? "Update Comment" : "Post Comment"}
           </button>
-          <button className="update-comment-button" onClick={handleUpdateComment}>
-            Update Comment
-          </button>
-          <button className="delete-comment-button" onClick={handleDeleteComment}>
-            Delete Comment
-          </button>
+          {editingCommentId && (
+            <button className="cancel-edit-button" onClick={() => {
+              setEditingCommentId(null);
+              setCommentText("");
+            }}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
+        <div className="comments-display">
+          <h3>Comments</h3>
+          {currentTrackComments.length > 0 ? (
+            <ul className="comments-list">
+              {currentTrackComments.map(comment => (
+                <li key={comment.id} className="comment-item">
+                  <div className="comment-content">
+                    <p className="comment-text">{comment.text}</p>
+                    <p className="comment-author">
+                      By: {comment.user_username || "Anonymous"}
+                    </p>
+                  </div>
+                  <div className="comment-actions">
+                    <button className="edit-comment-button" onClick={() => handleEditComment(comment)}>
+                      Edit
+                    </button>
+                    <button className="delete-comment-button" onClick={() => handleDeleteComment(comment.id)}>
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No comments yet. Be the first to comment!</p>
+          )}
         </div>
       </div>
     </div>

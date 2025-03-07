@@ -8,7 +8,8 @@ from app.utils.errors import (
     ResourceNotFoundError
 )
 
-playlist_routes = Blueprint('playlists', __name__)
+# Optionally, change the blueprint name to "playlist" for clarity.
+playlist_routes = Blueprint('playlist', __name__)
 
 # Create a new playlist
 @playlist_routes.route('/', methods=['POST'])
@@ -35,7 +36,7 @@ def get_playlist(playlist_id):
         raise AuthorizationError("Access denied")
     return api_success(data=playlist.to_dict())
 
-# Update playlist details (e.g. change the name)
+# Update playlist details (e.g., change the name)
 @playlist_routes.route('/<int:playlist_id>', methods=['PUT', 'PATCH'])
 @login_required
 def update_playlist(playlist_id):

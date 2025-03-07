@@ -192,3 +192,107 @@
   background: linear-gradient(90deg, #ffea00, #ff8c00); /* Matches your color scheme */
   transition: width 0.3s ease-out;
 }
+
+.comments-section {
+  margin: 20px 0;
+  width: 100%;
+}
+
+.comments-section textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.comment-button, .cancel-edit-button {
+  padding: 8px 16px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.comment-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cancel-edit-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.comments-display {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.comments-display h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+  color: #333;
+}
+
+.comments-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.comment-item {
+  padding: 12px;
+  margin-bottom: 10px;
+  background-color: white;
+  border-radius: 4px;
+  border-left: 4px solid #ffeb3b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-content {
+  flex: 1;
+}
+
+.comment-text {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+}
+
+.comment-author {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-comment-button, .delete-comment-button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.edit-comment-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.delete-comment-button {
+  background-color: #f44336;
+  color: white;
+}
