@@ -17,7 +17,7 @@ function MainPage() {
   const tracksObj = useSelector((state) => state.globalTracks);
   const commentsObj = useSelector((state) => state.comments);
   const likes = useSelector((state) => state.likes);
-  const playlistsObj = useSelector((state) => state.playlists);
+ 
   const tracksArray = Object.values(tracksObj);
   
   // State for current playing track index.
@@ -106,6 +106,15 @@ function MainPage() {
     }
   };
 
+  // Toggle like/unlike based on current state.
+  const toggleLike = () => {
+    if (likes[tracksArray[currentIndex]?.id]) {
+      handleUnlike();
+    } else {
+      handleLike();
+    }
+  };
+
   const handleAddToPlaylist = async () => {
     if (tracksArray[currentIndex]) {
       const playlistData = {
@@ -116,14 +125,13 @@ function MainPage() {
     }
   };
 
+
   const handlePostComment = async () => {
     if (tracksArray[currentIndex] && commentText.trim()) {
       if (editingCommentId) {
-        // Update existing comment.
         await dispatch(thunkUpdateComment(editingCommentId, commentText));
         setEditingCommentId(null);
       } else {
-        // Create new comment.
         await dispatch(thunkCreateComment(tracksArray[currentIndex].id, commentText));
       }
       setCommentText("");
@@ -217,7 +225,7 @@ function MainPage() {
         </div>
       </div>
       <div className="controls">
-        <button className="like-button" onClick={handleLike}>
+        <button className="like-button" onClick={toggleLike}>
           {likes[tracksArray[currentIndex]?.id] ? "Unlike" : "Like"}
         </button>
         <button className="add-to-playlist-button" onClick={handleAddToPlaylist}>
@@ -274,3 +282,4 @@ function MainPage() {
 }
 
 export default MainPage;
+

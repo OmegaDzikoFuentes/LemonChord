@@ -8,6 +8,8 @@ import * as sessionActions from "./redux/session";
 import "./index.css";
 
 const store = configureStore();
+console.log("store;;;;;;;;", store.getState());
+console.log("store no  xxxxxxx getState()", store);
 
 if (import.meta.env.MODE !== "production") {
   window.store = store;

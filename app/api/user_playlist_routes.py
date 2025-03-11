@@ -8,8 +8,8 @@ from app.utils.errors import (
     ResourceNotFoundError
 )
 
-# Optionally, change the blueprint name to "playlist" for clarity.
-playlist_routes = Blueprint('playlist', __name__)
+# Optionally, change the blueprint name to "myplaylist" for clarity.
+playlist_routes = Blueprint('myplaylist', __name__)
 
 # Create a new playlist
 @playlist_routes.route('/', methods=['POST'])

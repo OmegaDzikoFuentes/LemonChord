@@ -6,7 +6,7 @@ import {
   thunkUpdateTrack,
   thunkDeleteTrack
 } from "../../redux/userTracks";
-import { thunkCreatePlaylist } from "../../redux/playlists";
+import { thunkCreatePlaylist, thunkDeleteTrackFromPlaylist } from "../../redux/playlists";
 import { thunkAuthenticate } from "../../redux/session";
 import "./HomePage.css";
 
@@ -75,6 +75,11 @@ function HomePage() {
     dispatch(thunkDeleteTrack(trackId));
   };
 
+    // Example: Remove a track from a given playlist
+    const handleDeleteFromPlaylist = async (playlistId, trackId) => {
+      await dispatch(thunkDeleteTrackFromPlaylist(playlistId, trackId));
+    };
+
   const startEditing = (track) => {
     setEditingTrackId(track.id);
     setEditTitle(track.title);
@@ -109,26 +114,42 @@ function HomePage() {
         <h1>Welcome to LemonChord</h1>
       </header>
       
-      {/* My Playlists Section */}
-      <section className="playlist-section">
-        <h2>My Playlists</h2>
-        {sessionUser ? (
-          <>
-            {playlistsArray.length > 0 ? (
-              <ul>
-                {playlistsArray.map(pl => (
-                  <li key={pl.id}>{pl.name}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No playlists yet.</p>
-            )}
-            <button onClick={handleCreatePlaylist}>Create New Playlist</button>
-          </>
-        ) : (
-          <p>Sign in to manage your playlists.</p>
-        )}
-      </section>
+    {/* My Playlists Section */}
+<section className="playlist-section">
+  <h2>My Playlists</h2>
+  {sessionUser ? (
+    <>
+      {playlistsArray.length > 0 ? (
+        <ul>
+          {playlistsArray.map(playlist => (
+            <li key={playlist.id}>
+              <h3>{playlist.name}</h3>
+              {playlist.tracks && playlist.tracks.length > 0 ? (
+                <ul className="playlist-tracks">
+                  {playlist.tracks.map(track => (
+                    <li key={track.id}>
+                      {track.title}
+                      <button onClick={() => handleDeleteFromPlaylist(playlist.id, track.id)}>
+                        Remove from Playlist
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No tracks in this playlist.</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No playlists yet.</p>
+      )}
+      <button onClick={handleCreatePlaylist}>Create New Playlist</button>
+    </>
+  ) : (
+    <p>Sign in to manage your playlists.</p>
+  )}
+</section>
 
       {/* Upload Song Section */}
       <section className="upload-section">

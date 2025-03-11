@@ -1,23 +1,29 @@
+// myPlaylist.js
+
 // Action Types
 const LOAD_PLAYLISTS = 'playlists/loadPlaylists';
 const ADD_PLAYLIST = 'playlists/addPlaylist';
 const UPDATE_PLAYLIST = 'playlists/updatePlaylist';
-const REMOVE_PLAYLIST = 'playlists/removePlaylist';
-
+ 
 // Action Creators
 const loadPlaylists = (playlists) => ({
   type: LOAD_PLAYLISTS,
-  payload: playlists
+  payload: playlists 
 });
 
 const addPlaylist = (playlist) => ({
   type: ADD_PLAYLIST,
-  payload: playlist
+  payload: playlist 
 });
 
-// Thunk: Fetch playlists
+const updatePlaylist = (playlist) => ({
+  type: UPDATE_PLAYLIST,
+  payload: playlist 
+});
+
+// Thunk: Fetch playlists (user's personal playlists)
 export const thunkFetchPlaylists = () => async (dispatch) => {
-  const response = await fetch('/api/playlist/');
+  const response = await fetch('/api/myplaylist/');
   if (response.ok) {
     const data = await response.json();
     dispatch(loadPlaylists(data.playlists));
@@ -27,7 +33,7 @@ export const thunkFetchPlaylists = () => async (dispatch) => {
 
 // Thunk: Create a new playlist
 export const thunkCreatePlaylist = (playlistData) => async (dispatch) => {
-  const response = await fetch('/api/playlist/', {
+  const response = await fetch('/api/myplaylist/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(playlistData)
@@ -39,6 +45,19 @@ export const thunkCreatePlaylist = (playlistData) => async (dispatch) => {
   }
 };
 
+// Thunk: Delete a track from a playlist
+export const thunkDeleteTrackFromPlaylist = (playlistId, trackId) => async (dispatch) => {
+  const response = await fetch(`/api/myplaylist/${playlistId}/tracks/${trackId}`, {
+    method: 'DELETE'
+  });
+  if (response.ok) {
+    const updatedPlaylist = await response.json();
+    // Assuming the updated playlist data is under "data"
+    dispatch(updatePlaylist(updatedPlaylist.data));
+    return updatedPlaylist;
+  }
+};
+
 // Reducer
 const initialState = {};
 
@@ -46,7 +65,7 @@ const playlistsReducer = (state = initialState, action) => {
   switch (action.type) {
     case LOAD_PLAYLISTS: {
       const newState = {};
-      action.payload.forEach(playlist => {
+      action.payload.forEach((playlist) => {
         newState[playlist.id] = playlist;
       });
       return newState;
@@ -55,13 +74,8 @@ const playlistsReducer = (state = initialState, action) => {
     case UPDATE_PLAYLIST: {
       return { ...state, [action.payload.id]: action.payload };
     }
-    case REMOVE_PLAYLIST: {
-      const newState = { ...state };
-      delete newState[action.payload];
-      return newState;
-    }
     default:
-      return state;
+      return state; // Add this default case to return the current state
   }
 };
 
