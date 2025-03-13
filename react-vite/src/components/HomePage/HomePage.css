@@ -166,3 +166,47 @@ audio::cue {
   background: linear-gradient(90deg, #ffea00, #ff8c00); /* Matches your color scheme */
   transition: width 0.3s ease-out;
 }
+
+.track-like-container {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s ease;
+}
+
+.like-button:hover {
+  transform: scale(1.2);
+}
+
+.like-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.heart-icon {
+  font-size: 18px;
+  color: #777;
+}
+
+.heart-icon.liked {
+  color: #e25555;
+}
+
+/* Animation when liking */
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.liked .heart-icon {
+  animation: heartBeat 0.5s;
+}

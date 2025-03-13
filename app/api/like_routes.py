@@ -33,3 +33,10 @@ def unlike_track(track_id):
     db.session.delete(like)
     db.session.commit()
     return api_success(message="Track unliked successfully", status_code=200)
+
+# Get current user's likes
+@likes_routes.route('/current', methods=['GET'])
+@login_required
+def get_user_likes():
+    likes = Like.query.filter_by(user_id=current_user.id).all()
+    return api_success(data={'likes': [like.to_dict() for like in likes]})

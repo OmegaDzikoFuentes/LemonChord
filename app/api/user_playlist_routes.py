@@ -8,20 +8,28 @@ from app.utils.errors import (
     ResourceNotFoundError
 )
 
-# Optionally, change the blueprint name to "myplaylist" for clarity.
+
 playlist_routes = Blueprint('myplaylist', __name__)
 
-# Create a new playlist
 @playlist_routes.route('/', methods=['POST'])
 @login_required
 def create_playlist():
     data = request.get_json() or {}
     name = data.get('name')
+    track_id = data.get('trackId')  # Get trackId from request
+    
     if not name:
         raise ValidationError("Playlist name is required", errors={"name": "Required field"})
     
     playlist = Playlist(name=name, user_id=current_user.id)
     db.session.add(playlist)
+    
+    # Add track if provided
+    if track_id:
+        track = Track.query.get(track_id)
+        if track:
+            playlist.tracks.append(track)
+    
     db.session.commit()
     return api_success(data=playlist.to_dict(), message="Playlist created", status_code=201)
 
@@ -78,6 +86,13 @@ def add_track_to_playlist(playlist_id):
     db.session.commit()
     return api_success(data=playlist.to_dict(), message="Track added to playlist", status_code=200)
 
+# get all playlists for the current user
+@playlist_routes.route('/', methods=['GET'])
+@login_required
+def get_all_playlists():
+    playlists = Playlist.query.filter_by(user_id=current_user.id).all()
+    return api_success(data={"playlists": [playlist.to_dict() for playlist in playlists]})
+
 # Remove a track from the playlist
 @playlist_routes.route('/<int:playlist_id>/tracks/<int:track_id>', methods=['DELETE'])
 @login_required
@@ -97,3 +112,5 @@ def remove_track_from_playlist(playlist_id, track_id):
     playlist.tracks.remove(track)
     db.session.commit()
     return api_success(data=playlist.to_dict(), message="Track removed from playlist", status_code=200)
+
+

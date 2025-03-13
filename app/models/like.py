@@ -20,7 +20,8 @@ class Like(db.Model):
 
     def to_dict(self):
         return {
+            'id': f"{self.user_id}_{self.track_id}",  # Composite string identifier
             'user_id': self.user_id,
-            'track_id': self.track_id,
-            'created_at': self.created_at
+             'track_id': self.track_id,
+            'created_at': self.created_at.isoformat() if self.created_at else None
         }

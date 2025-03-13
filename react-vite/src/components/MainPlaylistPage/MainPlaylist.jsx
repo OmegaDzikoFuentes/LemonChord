@@ -1,3 +1,4 @@
+// MainPage.js
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkFetchGlobalTracks } from "../../redux/globalTracks";
@@ -9,7 +10,11 @@ import {
   thunkUpdateComment, 
   thunkDeleteComment 
 } from "../../redux/comments";
-import { thunkCreatePlaylist } from "../../redux/playlists";
+import { 
+  thunkFetchPlaylists,
+  thunkCreatePlaylist,
+  thunkAddTrackToPlaylist     
+ } from "../../redux/playlists";
 import "./MainPlaylist.css";
 
 function MainPage() {
@@ -17,8 +22,9 @@ function MainPage() {
   const tracksObj = useSelector((state) => state.globalTracks);
   const commentsObj = useSelector((state) => state.comments);
   const likes = useSelector((state) => state.likes);
- 
   const tracksArray = Object.values(tracksObj);
+  const playlists = useSelector((state) => state.playlists);
+  const playlistsArray = Object.values(playlists);
   
   // State for current playing track index.
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,6 +45,7 @@ function MainPage() {
   // Fetch global tracks on component mount.
   useEffect(() => {
     dispatch(thunkFetchGlobalTracks());
+    dispatch(thunkFetchPlaylists());
   }, [dispatch]);
 
   // Fetch comments for the current track whenever it changes.
@@ -94,37 +101,98 @@ function MainPage() {
     }
   };
 
-  const handleLike = async () => {
-    if (tracksArray[currentIndex]) {
-      await dispatch(thunkLikeTrack(tracksArray[currentIndex].id));
-    }
-  };
-
-  const handleUnlike = async () => {
-    if (tracksArray[currentIndex]) {
-      await dispatch(thunkUnlikeTrack(tracksArray[currentIndex].id));
-    }
-  };
-
-  // Toggle like/unlike based on current state.
-  const toggleLike = () => {
-    if (likes[tracksArray[currentIndex]?.id]) {
-      handleUnlike();
-    } else {
-      handleLike();
-    }
-  };
-
+  // Function to add the current track to a playlist.
   const handleAddToPlaylist = async () => {
-    if (tracksArray[currentIndex]) {
+    if (!tracksArray[currentIndex]) return;
+    
+    // Show options dialog
+    const options = ["Create New Playlist"];
+    
+    // Add existing playlists to options
+    playlistsArray.forEach(playlist => {
+      options.push(`Add to: ${playlist.name}`);
+    });
+    
+    // If no playlists yet, just prompt for a name
+    if (playlistsArray.length === 0) {
+      const name = prompt("Enter playlist name:", "My Playlist");
+      
+      // Exit if user cancels the prompt
+      if (name === null) return;
+      
+      const cleanName = name.trim() || "My Playlist";
+      
       const playlistData = {
-        name: "My Playlist",
+        name: cleanName,
         trackId: tracksArray[currentIndex].id,
       };
+        
       await dispatch(thunkCreatePlaylist(playlistData));
+      alert(`New playlist created: ${cleanName}`);
+      return;
+    }
+    
+    // Let user select from options
+    const selection = prompt(
+      `Select an option (enter number 1-${options.length}):\n` +
+      options.map((opt, i) => `${i+1}. ${opt}`).join('\n')
+    );
+    
+    if (!selection) return; // User canceled
+    
+    const selectedIndex = parseInt(selection) - 1;
+    
+    // Validate selection
+    if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= options.length) {
+      alert("Invalid selection");
+      return;
+    }
+    
+    // Handle creating new playlist
+    if (selectedIndex === 0) {
+      const name = prompt("Enter playlist name:", "My Playlist");
+      
+      // Exit if user cancels the prompt
+      if (name === null) return;
+      
+      const cleanName = name.trim() || "My Playlist";
+      
+      // Check for duplicates
+      const exists = playlistsArray.some(playlist => 
+        playlist.name.toLowerCase() === cleanName.toLowerCase()
+      );
+  
+      if (exists) {
+        alert("Playlist name already exists! Please choose a different name.");
+        return;
+      }
+  
+      const playlistData = {
+        name: cleanName,
+        trackId: tracksArray[currentIndex].id,
+      };
+        
+      await dispatch(thunkCreatePlaylist(playlistData));
+      alert(`New playlist created: ${cleanName}`);
+    } 
+    // Handle adding to existing playlist
+    else {
+      const playlistIndex = selectedIndex - 1;
+      const selectedPlaylist = playlistsArray[playlistIndex];
+      
+      // Check if track is already in the playlist
+      const trackId = tracksArray[currentIndex].id;
+      const trackAlreadyInPlaylist = selectedPlaylist.tracks?.some(track => track.id === trackId);
+      
+      if (trackAlreadyInPlaylist) {
+        alert("This track is already in the selected playlist!");
+        return;
+      }
+      
+      await dispatch(thunkAddTrackToPlaylist(selectedPlaylist.id, trackId));
+      alert(`Track added to playlist: ${selectedPlaylist.name}`);
     }
   };
-
 
   const handlePostComment = async () => {
     if (tracksArray[currentIndex] && commentText.trim()) {
@@ -145,6 +213,19 @@ function MainPage() {
 
   const handleDeleteComment = async (commentId) => {
     await dispatch(thunkDeleteComment(commentId));
+  };
+
+  // Manual like/unlike functions for extra buttons.
+  const handleLike = () => {
+    if (tracksArray[currentIndex]) {
+      dispatch(thunkLikeTrack(tracksArray[currentIndex].id));
+    }
+  };
+
+  const handleUnlike = () => {
+    if (tracksArray[currentIndex]) {
+      dispatch(thunkUnlikeTrack(tracksArray[currentIndex].id));
+    }
   };
 
   // Filter comments for the current track.
@@ -225,9 +306,15 @@ function MainPage() {
         </div>
       </div>
       <div className="controls">
-        <button className="like-button" onClick={toggleLike}>
-          {likes[tracksArray[currentIndex]?.id] ? "Unlike" : "Like"}
-        </button>
+        {/* Additional manual buttons to explicitly trigger like/unlike actions */}
+        <div className="manual-like-buttons">
+          <button onClick={handleLike}>Like</button>
+          <button onClick={handleUnlike}>Unlike</button>
+          <span>
+            {tracksArray[currentIndex] &&
+              (likes[tracksArray[currentIndex].id] ? "Liked" : "Not liked")}
+          </span>
+        </div>
         <button className="add-to-playlist-button" onClick={handleAddToPlaylist}>
           Add to My Playlist
         </button>
@@ -282,4 +369,3 @@ function MainPage() {
 }
 
 export default MainPage;
-

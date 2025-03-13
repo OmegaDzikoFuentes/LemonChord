@@ -25,6 +25,6 @@ class Playlist(db.Model):
             'id': self.id,
             'name': self.name,
             'user_id': self.user_id,
-            'created_at': self.created_at,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
             'tracks': [track.to_dict() for track in self.tracks]
         }

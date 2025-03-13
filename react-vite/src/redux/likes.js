@@ -3,6 +3,7 @@
 // Action Types
 const ADD_LIKE = 'likes/addLike';
 const REMOVE_LIKE = 'likes/removeLike';
+const LOAD_LIKES = 'likes/loadLikes';
 
 // Action Creators
 const addLike = (trackId) => ({
@@ -14,6 +15,30 @@ const removeLike = (trackId) => ({
   type: REMOVE_LIKE,
   payload: trackId,
 });
+
+const loadLikes = (likes) => ({
+  type: LOAD_LIKES,
+  payload: likes,
+});
+
+// Thunk to get all user likes
+export const thunkGetUserLikes = () => async (dispatch) => {
+  const response = await fetch('/api/likes/current');
+  
+  if (response.ok) {
+    const data = await response.json();
+    // Convert the array of likes into an object with trackIds as keys
+    const likesObj = {};
+    data.likes.forEach(like => {
+      likesObj[like.track_id] = true;
+    });
+    dispatch(loadLikes(likesObj));
+    return data;
+  } else {
+    const error = await response.json();
+    return error;
+  }
+};
 
 // Thunk to like a track
 export const thunkLikeTrack = (trackId) => async (dispatch) => {
@@ -49,6 +74,9 @@ const initialState = {};
 // Reducer
 const likesReducer = (state = initialState, action) => {
   switch (action.type) {
+    case LOAD_LIKES: {
+      return { ...action.payload };
+    }
     case ADD_LIKE: {
       return { ...state, [action.payload]: true };
     }

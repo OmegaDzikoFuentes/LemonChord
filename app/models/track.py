@@ -33,5 +33,5 @@ class Track(db.Model):
             'user_id': self.user_id,
             'duration': self.duration,
             'genre': self.genre,
-            'created_at': self.created_at
-        }
+            'created_at': self.created_at.isoformat() if self.created_at else None
+         }
