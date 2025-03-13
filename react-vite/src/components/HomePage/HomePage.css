@@ -210,3 +210,27 @@ audio::cue {
 .liked .heart-icon {
   animation: heartBeat 0.5s;
 }
+
+/* Add these to your HomePage.css file */
+
+.playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.delete-playlist-btn {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.delete-playlist-btn:hover {
+  background-color: #ff1744;
+}

@@ -3,6 +3,7 @@ const LOAD_PLAYLISTS = 'playlists/loadPlaylists';
 const ADD_PLAYLIST = 'playlists/addPlaylist';
 const UPDATE_PLAYLIST = 'playlists/updatePlaylist';
 const ADD_TRACK_TO_PLAYLIST = 'playlists/addTrackToPlaylist';
+const REMOVE_PLAYLIST = 'playlists/removePlaylist';
  
 // Action Creators
 const loadPlaylists = (playlists) => ({
@@ -23,6 +24,11 @@ const updatePlaylist = (playlist) => ({
 const addTrackToPlaylist = (playlist) => ({
   type: ADD_TRACK_TO_PLAYLIST,
   payload: playlist
+});
+
+const removePlaylist = (playlistId) => ({
+  type: REMOVE_PLAYLIST,
+  payload: playlistId
 });
 
 // Thunk: Fetch playlists (user's personal playlists)
@@ -92,6 +98,23 @@ export const thunkDeleteTrackFromPlaylist = (playlistId, trackId) => async (disp
   }
 };
 
+// Thunk: delete a playlist
+export const thunkDeletePlaylist = (playlistId) => async (dispatch) => {
+  try {
+    const response = await fetch(`/api/myplaylist/${playlistId}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw response;
+    
+    // On success, dispatch action to remove from store
+    dispatch(removePlaylist(playlistId));
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting playlist:", error);
+    return { success: false, error };
+  }
+};
+
 const initialState = {};
 
 // Revised reducer
@@ -119,6 +142,11 @@ const playlistsReducer = (state = initialState, action) => {
       // Handle nested data structures from API responses
       const playlist = action.payload?.data || action.payload;
       return { ...state, [playlist.id]: playlist };
+    }
+    case REMOVE_PLAYLIST: {
+      const newState = { ...state };
+      delete newState[action.payload];
+      return newState;
     }
     default:
       return state;

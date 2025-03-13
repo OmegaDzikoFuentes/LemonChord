@@ -7,7 +7,12 @@ import {
   thunkUpdateTrack,
   thunkDeleteTrack
 } from "../../redux/userTracks";
-import { thunkCreatePlaylist, thunkDeleteTrackFromPlaylist } from "../../redux/playlists";
+import { 
+  thunkCreatePlaylist, 
+  thunkDeleteTrackFromPlaylist,
+  thunkAddTrackToPlaylist,
+  thunkDeletePlaylist
+ } from "../../redux/playlists";
 import { thunkAuthenticate } from "../../redux/session";
 import { thunkFetchPlaylists } from "../../redux/playlists";
 import "./HomePage.css";
@@ -78,9 +83,137 @@ function HomePage() {
     dispatch(thunkDeleteTrack(trackId));
   };
 
-  // Example: Remove a track from a given playlist
+  // Remove a track from a given playlist
   const handleDeleteFromPlaylist = async (playlistId, trackId) => {
     await dispatch(thunkDeleteTrackFromPlaylist(playlistId, trackId));
+  };
+
+  // Delete a given playlist
+  const handleDeletePlaylist = async (playlistId) => {
+    if (window.confirm("Are you sure you want to delete this playlist?")) {
+      await dispatch(thunkDeletePlaylist(playlistId));
+    }
+  };
+
+  // Create a new playlist with a custom name
+  const handleCreatePlaylist = async () => {
+    // Prompt user for playlist name
+    const name = prompt("Enter playlist name:", "My Playlist");
+    
+    // Exit if user cancels the prompt
+    if (name === null) return;
+    
+    // Use provided name or default to "My Playlist" if empty
+    const cleanName = name.trim() || "My Playlist";
+    
+    // Check for duplicates
+    const exists = playlistsArray.some(playlist => 
+      playlist.name.toLowerCase() === cleanName.toLowerCase()
+    );
+
+    if (exists) {
+      alert("Playlist name already exists! Please choose a different name.");
+      return;
+    }
+
+    // Create the playlist
+    const playlistData = { name: cleanName };
+    const result = await dispatch(thunkCreatePlaylist(playlistData));
+    
+    if (result && result.data) {
+      // Optional: Give feedback to the user
+      alert(`New playlist created: ${cleanName}`);
+    }
+  };
+
+  // Add a track to a playlist
+  const handleAddTrackToPlaylist = async (trackId) => {
+    // If no playlists yet, create one directly
+    if (playlistsArray.length === 0) {
+      const name = prompt("Enter playlist name:", "My Playlist");
+      
+      // Exit if user cancels the prompt
+      if (name === null) return;
+      
+      const cleanName = name.trim() || "My Playlist";
+      
+      const playlistData = {
+        name: cleanName,
+        trackId: trackId, // Include track ID in the creation
+      };
+        
+      await dispatch(thunkCreatePlaylist(playlistData));
+      alert(`New playlist created: ${cleanName}`);
+      return;
+    }
+    
+    // Build options for playlist selection
+    const options = ["Create New Playlist"];
+    
+    // Add existing playlists to options
+    playlistsArray.forEach(playlist => {
+      options.push(`Add to: ${playlist.name}`);
+    });
+    
+    // Let user select from options
+    const selection = prompt(
+      `Select an option (enter number 1-${options.length}):\n` +
+      options.map((opt, i) => `${i+1}. ${opt}`).join('\n')
+    );
+    
+    if (!selection) return; // User canceled
+    
+    const selectedIndex = parseInt(selection) - 1;
+    
+    // Validate selection
+    if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= options.length) {
+      alert("Invalid selection");
+      return;
+    }
+    
+    // Handle creating new playlist
+    if (selectedIndex === 0) {
+      const name = prompt("Enter playlist name:", "My Playlist");
+      
+      // Exit if user cancels the prompt
+      if (name === null) return;
+      
+      const cleanName = name.trim() || "My Playlist";
+      
+      // Check for duplicates
+      const exists = playlistsArray.some(playlist => 
+        playlist.name.toLowerCase() === cleanName.toLowerCase()
+      );
+  
+      if (exists) {
+        alert("Playlist name already exists! Please choose a different name.");
+        return;
+      }
+  
+      const playlistData = {
+        name: cleanName,
+        trackId: trackId,
+      };
+        
+      await dispatch(thunkCreatePlaylist(playlistData));
+      alert(`New playlist created: ${cleanName}`);
+    } 
+    // Handle adding to existing playlist
+    else {
+      const playlistIndex = selectedIndex - 1;
+      const selectedPlaylist = playlistsArray[playlistIndex];
+      
+      // Check if track is already in the playlist
+      const trackAlreadyInPlaylist = selectedPlaylist.tracks?.some(track => track.id === trackId);
+      
+      if (trackAlreadyInPlaylist) {
+        alert("This track is already in the selected playlist!");
+        return;
+      }
+      
+      await dispatch(thunkAddTrackToPlaylist(selectedPlaylist.id, trackId));
+      alert(`Track added to playlist: ${selectedPlaylist.name}`);
+    }
   };
 
   const startEditing = (track) => {
@@ -106,11 +239,6 @@ function HomePage() {
     cancelEditing();
   };
 
-  const handleCreatePlaylist = async () => {
-    const playlistData = { name: "My Playlist" };
-    await dispatch(thunkCreatePlaylist(playlistData));
-  };
-
   return (
     <div className="home-page">
       <header className="home-header">
@@ -126,30 +254,38 @@ function HomePage() {
               <ul>
                 {playlistsArray.map(playlist => (
                   <li key={playlist.id}>
-                    <h3>{playlist.name}</h3>
+                    <div className="playlist-header">
+                      <h3>{playlist.name}</h3>
+                      <button 
+                        onClick={() => handleDeletePlaylist(playlist.id)}
+                        className="delete-playlist-btn"
+                      >
+                        Delete Playlist
+                      </button>
+                    </div>
                     {playlist.tracks && playlist.tracks.length > 0 ? (
-  <ul className="playlist-tracks">
-    {playlist.tracks.map(track => (
-      <li key={track.id} className="playlist-track-item">
-        <div className="track-info">
-          <span className="track-title">{track.title}</span>
-          <span className="track-genre">{track.genre}</span>
-        </div>
-        <audio controls src={track.audio_url} className="track-player">
-          Your browser does not support the audio element.
-        </audio>
-        <button 
-          onClick={() => handleDeleteFromPlaylist(playlist.id, track.id)}
-          className="remove-track-btn"
-        >
-          Remove from Playlist
-        </button>
-      </li>
-    ))}
-  </ul>
-) : (
-  <p>No tracks in this playlist.</p>
-)}
+                      <ul className="playlist-tracks">
+                        {playlist.tracks.map(track => (
+                          <li key={track.id} className="playlist-track-item">
+                            <div className="track-info">
+                              <span className="track-title">{track.title}</span>
+                              <span className="track-genre">{track.genre}</span>
+                            </div>
+                            <audio controls src={track.audio_url} className="track-player">
+                              Your browser does not support the audio element.
+                            </audio>
+                            <button 
+                              onClick={() => handleDeleteFromPlaylist(playlist.id, track.id)}
+                              className="remove-track-btn"
+                            >
+                              Remove from Playlist
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No tracks in this playlist.</p>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -236,6 +372,7 @@ function HomePage() {
                   <div className="track-controls">
                     <button onClick={() => handleDelete(track.id)}>Delete</button>
                     <button onClick={() => startEditing(track)}>Update</button>
+                    <button onClick={() => handleAddTrackToPlaylist(track.id)}>Add to Playlist</button>
                   </div>
                   {editingTrackId === track.id && (
                     <div className="update-form">

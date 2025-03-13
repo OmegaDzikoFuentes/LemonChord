@@ -113,4 +113,16 @@ def remove_track_from_playlist(playlist_id, track_id):
     db.session.commit()
     return api_success(data=playlist.to_dict(), message="Track removed from playlist", status_code=200)
 
-
+# Delete a playlist
+@playlist_routes.route('/<int:playlist_id>', methods=['DELETE'])
+@login_required
+def delete_playlist(playlist_id):
+    playlist = Playlist.query.get(playlist_id)
+    if not playlist:
+        raise ResourceNotFoundError("Playlist")
+    if playlist.user_id != current_user.id:
+        raise AuthorizationError("Access denied")
+    
+    db.session.delete(playlist)
+    db.session.commit()
+    return api_success(message="Playlist deleted successfully", status_code=200)
