@@ -42,7 +42,7 @@ export const thunkGetUserLikes = () => async (dispatch) => {
 
 // Thunk to like a track
 export const thunkLikeTrack = (trackId) => async (dispatch) => {
-  const response = await fetch(`/api/tracks/${trackId}/like`, {
+  const response = await fetch(`/api/likes/tracks/${trackId}/like`, {
     method: 'POST',
   });
   if (response.ok) {
@@ -56,7 +56,7 @@ export const thunkLikeTrack = (trackId) => async (dispatch) => {
 
 // Thunk to unlike a track
 export const thunkUnlikeTrack = (trackId) => async (dispatch) => {
-  const response = await fetch(`/api/tracks/${trackId}/like`, {
+  const response = await fetch(`/api/likes/tracks/${trackId}/like`, {
     method: 'DELETE',
   });
   if (response.ok) {

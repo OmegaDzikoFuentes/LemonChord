@@ -1,5 +1,5 @@
 // MainPage.js
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkFetchGlobalTracks } from "../../redux/globalTracks";
 import { thunkCreateTrack } from "../../redux/userTracks"; // for uploading a track globally
@@ -22,7 +22,7 @@ function MainPage() {
   const tracksObj = useSelector((state) => state.globalTracks);
   const commentsObj = useSelector((state) => state.comments);
   const likes = useSelector((state) => state.likes);
-  const tracksArray = Object.values(tracksObj);
+  const tracksArray = useMemo(() => Object.values(tracksObj), [tracksObj]);
   const playlists = useSelector((state) => state.playlists);
   const playlistsArray = Object.values(playlists);
   
@@ -249,6 +249,7 @@ function MainPage() {
               <>
                 <h2>{tracksArray[currentIndex].title}</h2>
                 <p>{tracksArray[currentIndex].genre}</p>
+                <span>{tracksArray[currentIndex].like_count} Lemons</span>
               </>
             )}
           </div>

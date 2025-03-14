@@ -29,7 +29,7 @@ const removeComment = (commentId) => ({
 
 // Thunk: Fetch comments for a specific track
 export const thunkFetchComments = (trackId, page = 1, per_page = 10) => async (dispatch) => {
-  const response = await fetch(`/api/tracks/${trackId}/comments?page=${page}&per_page=${per_page}`);
+  const response = await fetch(`/api/comments/tracks/${trackId}/comments?page=${page}&per_page=${per_page}`);
   if (response.ok) {
     const data = await response.json();
     // Assuming data.comments is an array of comment objects.
@@ -40,7 +40,7 @@ export const thunkFetchComments = (trackId, page = 1, per_page = 10) => async (d
 
 // Thunk: Create a new comment on a track
 export const thunkCreateComment = (trackId, text) => async (dispatch) => {
-  const response = await fetch(`/api/tracks/${trackId}/comments`, {
+  const response = await fetch(`/api/comments/tracks/${trackId}/comments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text })
