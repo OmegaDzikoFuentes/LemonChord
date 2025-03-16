@@ -1,4 +1,5 @@
 // likes.js
+import { updateGlobalTrack } from './globalTracks';
 
 // Action Types
 const ADD_LIKE = 'likes/addLike';
@@ -6,15 +7,17 @@ const REMOVE_LIKE = 'likes/removeLike';
 const LOAD_LIKES = 'likes/loadLikes';
 
 // Action Creators
-const addLike = (trackId) => ({
-  type: ADD_LIKE,
-  payload: trackId,
-});
 
-const removeLike = (trackId) => ({
-  type: REMOVE_LIKE,
-  payload: trackId,
-});
+// incase I want to show the user their likes
+// const addLike = (trackId) => ({
+//   type: ADD_LIKE,
+//   payload: trackId,
+// });
+
+// const removeLike = (trackId) => ({
+//   type: REMOVE_LIKE,
+//   payload: trackId,
+// });
 
 const loadLikes = (likes) => ({
   type: LOAD_LIKES,
@@ -42,15 +45,23 @@ export const thunkGetUserLikes = () => async (dispatch) => {
 
 // Thunk to like a track
 export const thunkLikeTrack = (trackId) => async (dispatch) => {
-  const response = await fetch(`/api/likes/tracks/${trackId}/like`, {
-    method: 'POST',
-  });
-  if (response.ok) {
-    dispatch(addLike(trackId));
-    return response;
-  } else {
-    const error = await response.json();
-    return error;
+  try {
+    const response = await fetch(`/api/likes/tracks/${trackId}/like`, {
+      method: 'POST',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      // Update the likes state (user's like status)
+      dispatch({ type: 'likes/addLike', payload: trackId });
+      // Update the global track with the new like_count
+      dispatch(updateGlobalTrack({ id: trackId, like_count: data.data.like_count }));
+      return data;
+    } else {
+      const error = await response.json();
+      return error;
+    }
+  } catch (error) {
+    console.error("Error liking track:", error);
   }
 };
 
@@ -60,8 +71,11 @@ export const thunkUnlikeTrack = (trackId) => async (dispatch) => {
     method: 'DELETE',
   });
   if (response.ok) {
-    dispatch(removeLike(trackId));
-    return response;
+    const data = await response.json();
+    dispatch({ type: 'likes/removeLike', payload: trackId });
+    // Update the global track with the new like_count
+    dispatch(updateGlobalTrack({ id: trackId, like_count: data.data.like_count }));
+    return data;
   } else {
     const error = await response.json();
     return error;

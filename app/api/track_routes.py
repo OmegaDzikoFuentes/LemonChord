@@ -2,10 +2,11 @@ import os
 import uuid
 import boto3
 from datetime import datetime
+from sqlalchemy import func
 from flask import Blueprint, request, jsonify, abort, current_app, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
-from app.models import db, Track
+from app.models import db, Track, Like 
 from app.utils.errors import (
     api_success, api_error, ValidationError, AuthorizationError, 
     FileUploadError, validate_file_size, validate_file_extension
@@ -186,7 +187,12 @@ def upload_track_form():
 @tracks_routes.route('/<int:track_id>', methods=['GET'])
 def get_track(track_id):
     track = Track.query.get_or_404(track_id)
-    return api_success(track.to_dict())
+    # Dynamically compute the like count
+    like_count = db.session.query(func.count(Like.track_id))\
+                           .filter(Like.track_id == track_id).scalar()
+    track_data = track.to_dict()
+    track_data['like_count'] = like_count
+    return api_success(track_data)
 @tracks_routes.route('/user', methods=['GET'])
 @login_required
 def get_user_tracks():

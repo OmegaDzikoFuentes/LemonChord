@@ -1,5 +1,5 @@
 // MainPage.js
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkFetchGlobalTracks } from "../../redux/globalTracks";
 import { thunkCreateTrack } from "../../redux/userTracks"; // for uploading a track globally
@@ -37,6 +37,7 @@ function MainPage() {
   const [uploadDuration, setUploadDuration] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Comment state
   const [commentText, setCommentText] = useState("");
@@ -55,20 +56,57 @@ function MainPage() {
     }
   }, [dispatch, currentIndex, tracksArray]);
 
-  // Update audio element source when the current track changes.
-  useEffect(() => {
-    if (tracksArray.length > 0 && audioRef.current) {
-      audioRef.current.src = tracksArray[currentIndex].audio_url;
-      audioRef.current.play();
+// Update audio element source when the current track changes.
+// Effect for handling track changes
+useEffect(() => {
+  if (tracksArray.length > 0 && audioRef.current) {
+    const wasPlaying = isPlaying;
+    
+    audioRef.current.src = tracksArray[currentIndex].audio_url;
+    audioRef.current.currentTime = 0; // Start from beginning for new tracks
+    
+    if (wasPlaying) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => console.error("Playback error:", e));
+      }
     }
-  }, [currentIndex, tracksArray]);
+  }
+}, [currentIndex, tracksArray, isPlaying]);
 
-  const handleSkip = () => {
-    if (tracksArray.length) {
-      const nextIndex = (currentIndex + 1) % tracksArray.length;
-      setCurrentIndex(nextIndex);
-    }
-  };
+const handleSkip = useCallback(() => {
+  if (tracksArray.length) {
+    const nextIndex = (currentIndex + 1) % tracksArray.length;
+    setCurrentIndex(nextIndex);
+  }
+}, [currentIndex, tracksArray]); 
+
+//effect for audio element event listeners:
+useEffect(() => {
+  const audioElement = audioRef.current; // Store ref in a variable inside the effect
+  
+  // Only add listeners if the audio element exists
+  if (audioElement) {
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      handleSkip(); // Automatically move to next track
+    };
+    
+    // Add event listeners
+    audioElement.addEventListener('play', handlePlay);
+    audioElement.addEventListener('pause', handlePause);
+    audioElement.addEventListener('ended', handleEnded);
+    
+    // Cleanup function uses the stored reference
+    return () => {
+      audioElement.removeEventListener('play', handlePlay);
+      audioElement.removeEventListener('pause', handlePause);
+      audioElement.removeEventListener('ended', handleEnded);
+    };
+  }
+}, [handleSkip]); 
 
   const handleFileChange = (e) => {
     setUploadFile(e.target.files[0]);
@@ -215,23 +253,55 @@ function MainPage() {
     await dispatch(thunkDeleteComment(commentId));
   };
 
-  // Manual like/unlike functions for extra buttons.
-  const handleLike = () => {
-    if (tracksArray[currentIndex]) {
-      dispatch(thunkLikeTrack(tracksArray[currentIndex].id));
-    }
-  };
+// Manual like/unlike functions for extra buttons.
+const handleLike = () => {
+  if (tracksArray[currentIndex]) {
+    // Save current playback state
+    const wasPlaying = isPlaying;
+    const currentTime = audioRef.current?.currentTime || 0;
+    
+    dispatch(thunkLikeTrack(tracksArray[currentIndex].id))
+      .then(() => {
+        // Restore playback state if necessary
+        if (wasPlaying && audioRef.current) {
+          audioRef.current.currentTime = currentTime;
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(e => console.error("Playback error:", e));
+          }
+        }
+      });
+  }
+};
 
-  const handleUnlike = () => {
-    if (tracksArray[currentIndex]) {
-      dispatch(thunkUnlikeTrack(tracksArray[currentIndex].id));
-    }
-  };
+// Similar for handleUnlike
+
+const handleUnlike = () => {
+  if (tracksArray[currentIndex]) {
+    // Save current playback state
+    const wasPlaying = isPlaying;
+    const currentTime = audioRef.current.currentTime || 0;
+    
+    dispatch(thunkUnlikeTrack(tracksArray[currentIndex].id))
+      .then(() => {
+        // Restore playback state if necessary
+        if (wasPlaying && audioRef.current) {
+          audioRef.current.currentTime = currentTime;
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(e => console.error("Playback error:", e));
+          }
+        }
+      });
+  }
+};
 
   // Filter comments for the current track.
   const currentTrackComments = Object.values(commentsObj).filter(
     comment => tracksArray[currentIndex] && comment.track_id === tracksArray[currentIndex].id
   );
+
+  console.log("Current Track Comments:", currentTrackComments);
 
   return (
     <div className="main-page">
@@ -313,7 +383,7 @@ function MainPage() {
           <button onClick={handleUnlike}>Unlike</button>
           <span>
             {tracksArray[currentIndex] &&
-              (likes[tracksArray[currentIndex].id] ? "Liked" : "Not liked")}
+              (likes[tracksArray[currentIndex].id] ? "Loved" : "almost liked")}
           </span>
         </div>
         <button className="add-to-playlist-button" onClick={handleAddToPlaylist}>
@@ -344,7 +414,8 @@ function MainPage() {
               {currentTrackComments.map(comment => (
                 <li key={comment.id} className="comment-item">
                   <div className="comment-content">
-                    <p className="comment-text">{comment.text}</p>
+                    
+                    <p className="comment-text">Words: {comment.text}</p>
                     <p className="comment-author">
                       By: {comment.user_username || "Anonymous"}
                     </p>

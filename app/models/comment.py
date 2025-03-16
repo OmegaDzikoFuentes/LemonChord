@@ -22,5 +22,6 @@ class Comment(db.Model):
             'text': self.text,
             'user_id': self.user_id,
             'track_id': self.track_id,
+            'user_username': self.user.username if self.user else "Anonymous",
             'created_at': self.created_at.isoformat() if self.created_at else None
      }

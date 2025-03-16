@@ -47,7 +47,7 @@ def list_comments(track_id):
     })
 
 # Update a comment (only by the comment owner)
-@comments_routes.route('/comments/<int:comment_id>', methods=['PUT', 'PATCH'])
+@comments_routes.route('/<int:comment_id>', methods=['PUT', 'PATCH'])
 @login_required
 def update_comment(comment_id):
     comment = Comment.query.filter_by(id=comment_id, user_id=current_user.id).first()
@@ -61,7 +61,7 @@ def update_comment(comment_id):
     return api_success(data=comment.to_dict(), message="Comment updated", status_code=200)
 
 # Delete a comment (only by the comment owner)
-@comments_routes.route('/comments/<int:comment_id>', methods=['DELETE'])
+@comments_routes.route('/<int:comment_id>', methods=['DELETE'])
 @login_required
 def delete_comment(comment_id):
     comment = Comment.query.filter_by(id=comment_id, user_id=current_user.id).first()

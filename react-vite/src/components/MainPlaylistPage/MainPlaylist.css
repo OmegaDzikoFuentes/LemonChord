@@ -265,6 +265,7 @@
 .comment-text {
   margin: 0 0 8px 0;
   font-size: 1rem;
+  color: #333;
 }
 
 .comment-author {

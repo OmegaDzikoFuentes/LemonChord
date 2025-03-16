@@ -31,10 +31,12 @@ const removeComment = (commentId) => ({
 export const thunkFetchComments = (trackId, page = 1, per_page = 10) => async (dispatch) => {
   const response = await fetch(`/api/comments/tracks/${trackId}/comments?page=${page}&per_page=${per_page}`);
   if (response.ok) {
-    const data = await response.json();
-    // Assuming data.comments is an array of comment objects.
-    dispatch(loadComments(data.comments));
-    return data;
+    const responseData = await response.json();
+    // The comments are in responseData.data.comments, not responseData.comments
+    if (responseData.data && responseData.data.comments) {
+      dispatch(loadComments(responseData.data.comments));
+      return responseData.data;
+    }
   }
 };
 
