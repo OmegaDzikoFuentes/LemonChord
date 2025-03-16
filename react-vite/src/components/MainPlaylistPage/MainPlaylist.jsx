@@ -58,21 +58,25 @@ function MainPage() {
 
 // Update audio element source when the current track changes.
 // Effect for handling track changes
+// Update audio element source when the current track changes.
 useEffect(() => {
   if (tracksArray.length > 0 && audioRef.current) {
     const wasPlaying = isPlaying;
     
-    audioRef.current.src = tracksArray[currentIndex].audio_url;
-    audioRef.current.currentTime = 0; // Start from beginning for new tracks
-    
-    if (wasPlaying) {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(e => console.error("Playback error:", e));
+    // Only update audio source if the track has actually changed
+    if (audioRef.current.src !== tracksArray[currentIndex].audio_url) {
+      audioRef.current.src = tracksArray[currentIndex].audio_url;
+      audioRef.current.currentTime = 0; // Start from beginning for new tracks
+      
+      if (wasPlaying) {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => console.error("Playback error:", e));
+        }
       }
     }
   }
-}, [currentIndex, tracksArray, isPlaying]);
+}, [currentIndex, tracksArray]);
 
 const handleSkip = useCallback(() => {
   if (tracksArray.length) {
@@ -260,6 +264,11 @@ const handleLike = () => {
     const wasPlaying = isPlaying;
     const currentTime = audioRef.current?.currentTime || 0;
     
+    // Crucial step: Pause the audio manually first to prevent interruption
+    if (wasPlaying && audioRef.current) {
+      audioRef.current.pause();
+    }
+    
     dispatch(thunkLikeTrack(tracksArray[currentIndex].id))
       .then(() => {
         // Restore playback state if necessary
@@ -274,13 +283,16 @@ const handleLike = () => {
   }
 };
 
-// Similar for handleUnlike
-
 const handleUnlike = () => {
   if (tracksArray[currentIndex]) {
     // Save current playback state
     const wasPlaying = isPlaying;
-    const currentTime = audioRef.current.currentTime || 0;
+    const currentTime = audioRef.current?.currentTime || 0;
+    
+    // Crucial step: Pause the audio manually first to prevent interruption
+    if (wasPlaying && audioRef.current) {
+      audioRef.current.pause();
+    }
     
     dispatch(thunkUnlikeTrack(tracksArray[currentIndex].id))
       .then(() => {

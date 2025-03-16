@@ -78,8 +78,14 @@ const globalTracksReducer = (state = initialState, action) => {
     }
     case ADD_GLOBAL_TRACK:
     case UPDATE_GLOBAL_TRACK: {
-      return { ...state, [action.payload.id]: action.payload };
-    }
+        return { 
+          ...state, 
+          [action.payload.id]: {
+            ...state[action.payload.id],
+            ...action.payload
+          } 
+        };
+      }
     case REMOVE_GLOBAL_TRACK: {
       const newState = { ...state };
       delete newState[action.payload];
