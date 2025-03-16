@@ -415,7 +415,7 @@ const handleUnlike = () => {
                 <li key={comment.id} className="comment-item">
                   <div className="comment-content">
                     
-                    <p className="comment-text">Words: {comment.text}</p>
+                    <p className="comment-text">{comment.text}</p>
                     <p className="comment-author">
                       By: {comment.user_username || "Anonymous"}
                     </p>

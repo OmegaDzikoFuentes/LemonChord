@@ -1,0 +1,117 @@
+/* ProfileButton.css */
+.profile-button {
+    background: #333;
+    border: 2px solid #000;
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+  }
+  
+  .profile-button:hover {
+    transform: translateY(-2px);
+    background: #ff8c00;
+  }
+  
+  .profile-button svg {
+    color: #ff8c00;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+  }
+  
+  .profile-button:hover svg {
+    color: #333;
+  }
+  
+  .profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #2c2c2c;
+    border: 3px solid #000;
+    border-radius: 10px;
+    padding: 20px;
+    list-style: none;
+    margin: 10px 0 0;
+    min-width: 200px;
+    box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+    z-index: 1000;
+    font-family: 'Courier New', monospace;
+  }
+  
+  /* Cassette tape holes */
+  .profile-dropdown::before,
+  .profile-dropdown::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #5a5a5a;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 2px solid #000;
+  }
+  
+  .profile-dropdown::before {
+    left: -10px;
+  }
+  
+  .profile-dropdown::after {
+    right: -10px;
+  }
+  
+  .profile-dropdown li {
+    color: #fff;
+    padding: 8px 0;
+    border-bottom: 1px solid #4a4a4a;
+  }
+  
+  .profile-dropdown li:first-child {
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #ff8c00, #ffea00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-bottom: 2px solid #ff8c00;
+    padding-bottom: 10px;
+  }
+  
+  .profile-dropdown li:last-child {
+    border-bottom: none;
+  }
+  
+  .profile-dropdown button {
+    background: #ff8c00;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  .profile-dropdown button:hover {
+    background: #ff6a00;
+    transform: translateY(-1px);
+  }
+  
+  /* Menu items styling */
+  .profile-dropdown .modal-menu-item {
+    color: #fff;
+    background: none;
+    border: none;
+    padding: 8px 0;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .profile-dropdown .modal-menu-item:hover {
+    color: #ff8c00;
+    padding-left: 5px;
+  }

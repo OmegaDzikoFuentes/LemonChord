@@ -12,31 +12,33 @@
 
 /* Each navigation item */
 .nav-list li {
-  margin: 0 15px;
+  margin: 0 10px;
+  position: relative;
 }
 
-/* Navigation links */
-.nav-list li a {
-  color: #222; /* Dark text to contrast with the bright gradient */
-  font-size: 1.2rem;
+/* Style all nav items as buttons */
+.nav-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #333;
+  color: white !important;
+  border-radius: 5px;
+  border: 2px solid #000;
   text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
+  font-family: 'Courier New', monospace;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
 }
 
-/* Hover state for navigation links */
-.nav-list li a:hover {
-  color: #fff;
+.nav-button:hover {
+  transform: translateY(-2px);
+  color: #ff8c00 !important;
 }
 
-/* Example styling for the profile dropdown */
+/* Profile dropdown positioning */
 .profile-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
-  background: #fff;
-  color: #222;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
+  margin-top: 5px;
 }

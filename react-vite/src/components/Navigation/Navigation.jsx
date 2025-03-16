@@ -5,15 +5,15 @@ import "./Navigation.css";
 
 function Navigation() {
   return (
-    <ul>
+    <ul className="nav-list">
       <li>
-        <NavLink to="/">Home</NavLink>
+        <NavLink to="/" className="nav-button">Home</NavLink>
       </li>
       <li>
-        <NavLink to="/main">BOOMBOX</NavLink>
+        <NavLink to="/main" className="nav-button">BOOMBOX</NavLink>
       </li>
       <li>
-        <ProfileButton />
+        <ProfileButton className="nav-button" />
       </li>
     </ul>
   );
