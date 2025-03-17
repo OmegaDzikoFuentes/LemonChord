@@ -31,12 +31,15 @@ function HomePage() {
   const [uploadGenre, setUploadGenre] = useState("");
   const [uploadDuration, setUploadDuration] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadArtist, setUploadArtist] = useState("");
 
   // State for editing a track
   const [editingTrackId, setEditingTrackId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editGenre, setEditGenre] = useState("");
   const [editDuration, setEditDuration] = useState("");
+  const [editArtist, setEditArtist] = useState("");
+
 
   // Fetch session and user tracks on component mount.
   useEffect(() => {
@@ -63,6 +66,7 @@ function HomePage() {
       formData.append("title", uploadTitle || "New Track");
       formData.append("genre", uploadGenre || "Unknown");
       formData.append("duration", uploadDuration || 180);
+      formData.append("artist_name", uploadArtist || ""); 
 
       setTimeout(() => setUploadProgress(50), 500);
       setTimeout(() => setUploadProgress(80), 1000);
@@ -76,6 +80,7 @@ function HomePage() {
       setUploadTitle("");
       setUploadGenre("");
       setUploadDuration("");
+      setUploadArtist("");
     }
   };
 
@@ -221,6 +226,7 @@ function HomePage() {
     setEditTitle(track.title);
     setEditGenre(track.genre);
     setEditDuration(track.duration);
+    setEditArtist(track.artist_name || "");
   };
 
   const cancelEditing = () => {
@@ -235,6 +241,7 @@ function HomePage() {
     formData.append("title", editTitle);
     formData.append("genre", editGenre);
     formData.append("duration", editDuration);
+    formData.append("artist_name", editArtist);
     await dispatch(thunkUpdateTrack(trackId, formData));
     cancelEditing();
   };
@@ -268,8 +275,9 @@ function HomePage() {
                         {playlist.tracks.map(track => (
                           <li key={track.id} className="playlist-track-item">
                             <div className="track-info">
-                              <span className="track-title">{track.title}</span>
-                              <span className="track-genre">{track.genre}</span>
+                                <span className="track-title">{track.title}</span>
+                                {track.artist_name && <span className="track-artist"> by {track.artist_name}</span>}
+                                <span className="track-genre">{track.genre}</span>
                             </div>
                             <audio controls src={track.audio_url} className="track-player">
                               Your browser does not support the audio element.
@@ -312,6 +320,15 @@ function HomePage() {
                 value={uploadTitle}
                 onChange={(e) => setUploadTitle(e.target.value)}
               />
+            </div>
+            <div>
+            <label htmlFor="artist_name">Artist:</label>
+              <input
+                 type="text"
+                 id="artist_name"
+                  value={uploadArtist}
+                onChange={(e) => setUploadArtist(e.target.value)}
+               />
             </div>
             <div>
               <label htmlFor="genre">Genre:</label>
@@ -364,7 +381,9 @@ function HomePage() {
               {tracksArray.map((track) => (
                 <li key={track.id}>
                   <div>
-                    <strong>{track.title}</strong> – {track.genre}
+                    <strong>{track.title}</strong> 
+                    {track.artist_name && <span> by {track.artist_name}</span>} 
+                         – {track.genre}
                   </div>
                   <audio controls src={track.audio_url}>
                     Your browser does not support the audio element.
@@ -376,24 +395,33 @@ function HomePage() {
                   </div>
                   {editingTrackId === track.id && (
                     <div className="update-form">
-                      <input
-                        type="text"
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        value={editGenre}
-                        onChange={(e) => setEditGenre(e.target.value)}
-                      />
-                      <input
-                        type="number"
-                        value={editDuration}
-                        onChange={(e) => setEditDuration(e.target.value)}
-                      />
-                      <button onClick={() => handleUpdate(track.id)}>Submit Update</button>
-                      <button onClick={cancelEditing}>Cancel</button>
-                    </div>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="Title"
+                    />
+                    <input
+                      type="text"
+                      value={editGenre}
+                      onChange={(e) => setEditGenre(e.target.value)}
+                      placeholder="Genre"
+                    />
+                    <input
+                      type="text"
+                      value={editArtist}
+                      onChange={(e) => setEditArtist(e.target.value)}
+                      placeholder="Artist Name"
+                    />
+                    <input
+                      type="number"
+                      value={editDuration}
+                      onChange={(e) => setEditDuration(e.target.value)}
+                      placeholder="Duration"
+                    />
+                    <button onClick={() => handleUpdate(track.id)}>Submit Update</button>
+                    <button onClick={cancelEditing}>Cancel</button>
+                  </div>
                   )}
                 </li>
               ))}

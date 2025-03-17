@@ -38,6 +38,7 @@ function MainPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [uploadArtist, setUploadArtist] = useState("");
 
   // Comment state
   const [commentText, setCommentText] = useState("");
@@ -125,6 +126,7 @@ useEffect(() => {
       formData.append("title", uploadTitle || "New Track");
       formData.append("genre", uploadGenre || "Unknown");
       formData.append("duration", uploadDuration || 180);
+      formData.append("artist_name", uploadArtist || "");
 
       // Simulate upload progress.
       setTimeout(() => setUploadProgress(50), 500);
@@ -140,6 +142,7 @@ useEffect(() => {
       setUploadGenre("");
       setUploadDuration("");
       setShowUploadForm(false);
+      setUploadArtist("");
     }
   };
 
@@ -356,6 +359,15 @@ const handleUnlike = () => {
                     onChange={(e) => setUploadTitle(e.target.value)}
                   />
                 </div>
+                <div>
+                  <label htmlFor="artist-upload">Artist:</label>
+                    <input
+                     type="text"
+                    id="artist-upload"
+                    value={uploadArtist}
+                    onChange={(e) => setUploadArtist(e.target.value)}
+                     />
+                  </div>
                 <div>
                   <label htmlFor="genre-upload">Genre:</label>
                   <input

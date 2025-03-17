@@ -87,12 +87,15 @@ def create_track():
         genre = request.form.get('genre')
         duration = request.form.get('duration')
         audio_file = request.files.get('audio_file')
+        artist_name = request.form.get('artist_name')
 
         # Validate required fields
         if not title:
             raise ValidationError("Title is required", errors={"title": "Required field"})
         if not audio_file:
             raise ValidationError("Audio file is required", errors={"audio_file": "Required field"})
+        if not artist_name:
+            raise ValidationError("Artist name is required", errors={"artist_name": "Required field"})
         
         # Validate file type and size
         validate_file_extension(audio_file.filename, ALLOWED_EXTENSIONS)
@@ -118,6 +121,7 @@ def create_track():
             audio_url=file_url,
             genre=genre,
             duration=duration,
+            artist_name=artist_name,
             user_id=current_user.id
         )
         
@@ -149,6 +153,7 @@ def upload_track_form():
             title = form.title.data
             genre = form.genre.data
             duration = form.duration.data
+            artist_name = form.artist_name.data
             audio_file = form.audio_file.data
 
             # (The FileAllowed validator on the form ensures proper extension,
@@ -171,6 +176,7 @@ def upload_track_form():
                 audio_url=file_url,
                 genre=genre,
                 duration=duration,
+                artist_name=artist_name,
                 user_id=current_user.id
             )
             db.session.add(new_track)
@@ -218,6 +224,8 @@ def update_track(track_id):
                 track.genre = request.form.get('genre')
             if 'duration' in request.form:
                 track.duration = request.form.get('duration')
+            if 'artist_name' in request.form:
+                    track.artist_name = request.form.get('artist_name')
             
             if 'audio_file' in request.files:
                 audio_file = request.files['audio_file']
@@ -233,7 +241,7 @@ def update_track(track_id):
                     file_path = os.path.join(upload_folder, unique_filename)
                     audio_file.save(file_path)
                     file_url = file_path
-                track.audio_url = file_url
+                    track.audio_url = file_url
         else:
             data = request.get_json() or {}
             if 'title' in data:
@@ -242,6 +250,8 @@ def update_track(track_id):
                 track.genre = data['genre']
             if 'duration' in data:
                 track.duration = data['duration']
+            if 'artist_name' in data:
+                track.artist_name = data['artist_name']
         
         db.session.commit()
         

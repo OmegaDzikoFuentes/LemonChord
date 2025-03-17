@@ -9,6 +9,7 @@ class UploadForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     genre = StringField('Genre')
     duration = StringField('Duration')
+    artist_name = StringField('Artist Name')
     audio_file = FileField(
         'Audio File',
         validators=[
