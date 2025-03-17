@@ -39,6 +39,7 @@ function MainPage() {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [uploadArtist, setUploadArtist] = useState("");
+  const [errors, setErrors] = useState({});
 
   // Comment state
   const [commentText, setCommentText] = useState("");
@@ -119,7 +120,20 @@ useEffect(() => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (uploadFile) {
+    setErrors({});
+    // Client-side validation
+      const newErrors = {};
+      if (!uploadFile) newErrors.audio_file = "Audio file is required";
+      if (!uploadTitle.trim()) newErrors.title = "Title is required";
+      if (!uploadGenre.trim()) newErrors.genre = "Genre is required";
+      if (!uploadDuration || uploadDuration < 10) newErrors.duration = "Duration must be at least 10 seconds";
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
+      try {
       setUploadProgress(10);
       const formData = new FormData();
       formData.append("audio_file", uploadFile);
@@ -132,17 +146,26 @@ useEffect(() => {
       setTimeout(() => setUploadProgress(50), 500);
       setTimeout(() => setUploadProgress(80), 1000);
 
-      await dispatch(thunkCreateTrack(formData));
+      const result = await dispatch(thunkCreateTrack(formData));
       
       setUploadProgress(100);
       setTimeout(() => setUploadProgress(0), 500);
       
-      setUploadFile(null);
-      setUploadTitle("");
-      setUploadGenre("");
-      setUploadDuration("");
-      setShowUploadForm(false);
-      setUploadArtist("");
+      if (result?.errors) {
+        setErrors(result.errors);
+      } else {
+        // Reset form on success
+        setUploadFile(null);
+        setUploadTitle("");
+        setUploadGenre("");
+        setUploadDuration("");
+        setUploadArtist("");
+        setShowUploadForm(false);
+      }
+    } catch (error) {
+      setErrors({ server: "Error uploading track" });
+    } finally {
+      setUploadProgress(0);
     }
   };
 
@@ -344,49 +367,65 @@ const handleUnlike = () => {
             </audio>
           </div>
           <button onClick={() => setShowUploadForm(!showUploadForm)}>
-            {showUploadForm ? "Hide Upload Form" : "Show Upload Form"}
+                {showUploadForm ? "Hide Upload Form" : "Show Upload Form"}
+              </button>
+              {showUploadForm && (
+      <div className="upload-slot">
+        <form onSubmit={handleUpload}>
+          <input 
+            type="file" 
+            accept="audio/*" 
+            onChange={handleFileChange} 
+          />
+          {errors.audio_file && <p className="error">{errors.audio_file}</p>}
+          
+          <div>
+            <label htmlFor="title-upload">Title:</label>
+            <input
+              type="text"
+              id="title-upload"
+              value={uploadTitle}
+              onChange={(e) => setUploadTitle(e.target.value)}
+            />
+            {errors.title && <p className="error">{errors.title}</p>}
+          </div>
+          <div>
+            <label htmlFor="artist-upload">Artist:</label>
+            <input
+              type="text"
+              id="artist-upload"
+              value={uploadArtist}
+              onChange={(e) => setUploadArtist(e.target.value)}
+            />
+            {errors.artist_name && <p className="error">{errors.artist_name}</p>}
+          </div>
+          <div>
+            <label htmlFor="genre-upload">Genre:</label>
+            <input
+              type="text"
+              id="genre-upload"
+              value={uploadGenre}
+              onChange={(e) => setUploadGenre(e.target.value)}
+            />
+            {errors.genre && <p className="error">{errors.genre}</p>}
+          </div>
+          <div>
+            <label htmlFor="duration-upload">Duration (sec):</label>
+            <input
+              type="number"
+              id="duration-upload"
+              value={uploadDuration}
+              onChange={(e) => setUploadDuration(e.target.value)}
+            />
+            {errors.duration && <p className="error">{errors.duration}</p>}
+          </div>
+          {errors.server && <p className="error">{errors.server}</p>}
+          <button 
+            type="submit" 
+            disabled={uploadProgress > 0}
+          >
+            Upload Your Track
           </button>
-          {showUploadForm && (
-            <div className="upload-slot">
-              <form onSubmit={handleUpload}>
-                <input type="file" accept="audio/*" onChange={handleFileChange} />
-                <div>
-                  <label htmlFor="title-upload">Title:</label>
-                  <input
-                    type="text"
-                    id="title-upload"
-                    value={uploadTitle}
-                    onChange={(e) => setUploadTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="artist-upload">Artist:</label>
-                    <input
-                     type="text"
-                    id="artist-upload"
-                    value={uploadArtist}
-                    onChange={(e) => setUploadArtist(e.target.value)}
-                     />
-                  </div>
-                <div>
-                  <label htmlFor="genre-upload">Genre:</label>
-                  <input
-                    type="text"
-                    id="genre-upload"
-                    value={uploadGenre}
-                    onChange={(e) => setUploadGenre(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="duration-upload">Duration (sec):</label>
-                  <input
-                    type="number"
-                    id="duration-upload"
-                    value={uploadDuration}
-                    onChange={(e) => setUploadDuration(e.target.value)}
-                  />
-                </div>
-                <button type="submit">Upload Your Track</button>
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <div className="progress-bar">
                     <div className="progress-bar-fill" style={{ width: `${uploadProgress}%` }}></div>

@@ -32,6 +32,7 @@ function HomePage() {
   const [uploadDuration, setUploadDuration] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadArtist, setUploadArtist] = useState("");
+  const [errors, setErrors] = useState({});
 
   // State for editing a track
   const [editingTrackId, setEditingTrackId] = useState(null);
@@ -57,30 +58,54 @@ function HomePage() {
     setUploadFile(e.target.files[0]);
   };
 
+  
   const handleUpload = async (e) => {
-    e.preventDefault();
-    if (uploadFile) {
-      setUploadProgress(10);
-      const formData = new FormData();
-      formData.append("audio_file", uploadFile);
-      formData.append("title", uploadTitle || "New Track");
-      formData.append("genre", uploadGenre || "Unknown");
-      formData.append("duration", uploadDuration || 180);
-      formData.append("artist_name", uploadArtist || ""); 
-
-      setTimeout(() => setUploadProgress(50), 500);
-      setTimeout(() => setUploadProgress(80), 1000);
-
-      await dispatch(thunkCreateTrack(formData));
+      e.preventDefault();
+      setErrors({}); // Reset errors
       
-      setUploadProgress(100);
-      setTimeout(() => setUploadProgress(0), 500);
-      
-      setUploadFile(null);
-      setUploadTitle("");
-      setUploadGenre("");
-      setUploadDuration("");
-      setUploadArtist("");
+      // Client-side validation
+      const newErrors = {};
+      if (!uploadFile) newErrors.audio_file = "Audio file is required";
+      if (!uploadTitle.trim()) newErrors.title = "Title is required";
+      if (!uploadGenre.trim()) newErrors.genre = "Genre is required";
+      if (!uploadDuration || uploadDuration < 10) newErrors.duration = "Duration must be at least 10 seconds";
+    
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
+      try {
+        setUploadProgress(10);
+        const formData = new FormData();
+        formData.append("audio_file", uploadFile);
+        formData.append("title", uploadTitle || "New Track");
+        formData.append("genre", uploadGenre || "Unknown");
+        formData.append("duration", uploadDuration || 180);
+        formData.append("artist_name", uploadArtist || ""); 
+
+        setTimeout(() => setUploadProgress(50), 500);
+        setTimeout(() => setUploadProgress(80), 1000);
+        
+        setUploadProgress(100);
+        setTimeout(() => setUploadProgress(0), 500);
+        
+        const result = await dispatch(thunkCreateTrack(formData));
+    
+        if (result?.errors) {
+          setErrors(result.errors);
+        } else {
+          // Reset form on success
+          setUploadFile(null);
+          setUploadTitle("");
+          setUploadGenre("");
+          setUploadDuration("");
+          setUploadArtist("");
+        }
+    } catch (error) {
+      setErrors({ server: "Error uploading track" });
+    } finally {
+      setUploadProgress(0);
     }
   };
 
@@ -320,15 +345,17 @@ function HomePage() {
                 value={uploadTitle}
                 onChange={(e) => setUploadTitle(e.target.value)}
               />
+              {errors.title && <p className="error">{errors.title}</p>}
             </div>
             <div>
-            <label htmlFor="artist_name">Artist:</label>
+              <label htmlFor="artist_name">Artist:</label>
               <input
-                 type="text"
-                 id="artist_name"
-                  value={uploadArtist}
+                type="text"
+                id="artist_name"
+                value={uploadArtist}
                 onChange={(e) => setUploadArtist(e.target.value)}
-               />
+              />
+              {errors.artist_name && <p className="error">{errors.artist_name}</p>}
             </div>
             <div>
               <label htmlFor="genre">Genre:</label>
@@ -338,6 +365,7 @@ function HomePage() {
                 value={uploadGenre}
                 onChange={(e) => setUploadGenre(e.target.value)}
               />
+              {errors.genre && <p className="error">{errors.genre}</p>}
             </div>
             <div>
               <label htmlFor="duration">Duration (seconds):</label>
@@ -347,6 +375,7 @@ function HomePage() {
                 value={uploadDuration}
                 onChange={(e) => setUploadDuration(e.target.value)}
               />
+              {errors.duration && <p className="error">{errors.duration}</p>}
             </div>
             <div>
               <label htmlFor="audio_file">Audio File:</label>
@@ -356,8 +385,15 @@ function HomePage() {
                 accept="audio/*"
                 onChange={handleFileChange}
               />
+              {errors.audio_file && <p className="error">{errors.audio_file}</p>}
             </div>
-            <button type="submit">Upload Song</button>
+            {errors.server && <p className="error">{errors.server}</p>}
+            <button 
+              type="submit" 
+              disabled={uploadProgress > 0}
+            >
+              Upload Song
+            </button>
             {uploadProgress > 0 && uploadProgress < 100 && (
               <div className="progress-bar">
                 <div

@@ -341,3 +341,14 @@
 .liked .heart-icon {
   animation: heartBeat 0.5s;
 }
+
+.error {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

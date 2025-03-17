@@ -16,19 +16,32 @@ function LoginFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = {};
 
-    const serverResponse = await dispatch(
-      thunkLogin({
-        email,
-        password,
-      })
-    );
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Invalid email address";
+    }
+
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      return setErrors(newErrors);
+    }
+
+    setErrors({});
+    const serverResponse = await dispatch(thunkLogin({ email, password }));
 
     if (serverResponse) {
       setErrors(serverResponse);
     } else {
       navigate("/");
     }
+  };
+
+  const isLoginDisabled = () => {
+    return !email.trim() || !/\S+@\S+\.\S+/.test(email) || !password.trim();
   };
 
   return (
@@ -43,7 +56,7 @@ function LoginFormPage() {
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            
           />
         </label>
         {errors.email && <p>{errors.email}</p>}
@@ -53,11 +66,16 @@ function LoginFormPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
+            
           />
         </label>
         {errors.password && <p>{errors.password}</p>}
-        <button type="submit">Log In</button>
+        <button 
+        type="submit" 
+        disabled={isLoginDisabled()}
+        className={isLoginDisabled() ? "disabled" : ""}
+      >
+        Log In</button>
       </form>
     </div>
   );
