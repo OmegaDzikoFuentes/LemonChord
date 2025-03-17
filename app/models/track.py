@@ -27,6 +27,13 @@ class Track(db.Model):
     )
 
     def to_dict(self):
+        from sqlalchemy import func
+        from app.models import Like
+        
+        # Query the like count
+        like_count = db.session.query(func.count(Like.track_id))\
+                            .filter(Like.track_id == self.id).scalar()
+        
         return {
             'id': self.id,
             'title': self.title,
@@ -36,5 +43,5 @@ class Track(db.Model):
             'genre': self.genre,
             'artist_name': self.artist_name,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'like_count': len(self.likes)
-         }
+            'like_count': like_count
+        }

@@ -77,7 +77,7 @@ useEffect(() => {
       }
     }
   }
-}, [currentIndex, tracksArray]);
+}, [currentIndex, tracksArray, isPlaying]);
 
 const handleSkip = useCallback(() => {
   if (tracksArray.length) {
@@ -316,7 +316,7 @@ const handleUnlike = () => {
     comment => tracksArray[currentIndex] && comment.track_id === tracksArray[currentIndex].id
   );
 
-  console.log("Current Track Comments:", currentTrackComments);
+
 
   return (
     <div className="main-page">
