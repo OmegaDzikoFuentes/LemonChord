@@ -19,7 +19,7 @@ function LoginFormPage() {
     const newErrors = {};
 
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Invalid email address";
+      newErrors.email = "Email address Is Invalid";
     }
 
     if (!password.trim()) {
