@@ -36,6 +36,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('playlist_tracks',
+    sa.Column('playlist_id', sa.Integer(), nullable=False),
+    sa.Column('track_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['playlist_id'], ['playlists.id'], ),
+    sa.ForeignKeyConstraint(['track_id'], ['tracks.id'], ),
+    sa.PrimaryKeyConstraint('playlist_id', 'track_id')
+    )
     op.create_table('tracks',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=True),
@@ -65,13 +72,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['track_id'], ['tracks.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('user_id', 'track_id')
-    )
-    op.create_table('playlist_tracks',
-    sa.Column('playlist_id', sa.Integer(), nullable=False),
-    sa.Column('track_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['playlist_id'], ['playlists.id'], ),
-    sa.ForeignKeyConstraint(['track_id'], ['tracks.id'], ),
-    sa.PrimaryKeyConstraint('playlist_id', 'track_id')
     )
     # ### end Alembic commands ###
 

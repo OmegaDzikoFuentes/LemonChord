@@ -363,7 +363,7 @@ const handleUnlike = () => {
           </div>
           <div className="audio-player">
             <audio ref={audioRef} controls onEnded={handleSkip}>
-              Your browser does not support the audio element.
+              Your browser does not support the audio player.
             </audio>
           </div>
           <button onClick={() => setShowUploadForm(!showUploadForm)}>
