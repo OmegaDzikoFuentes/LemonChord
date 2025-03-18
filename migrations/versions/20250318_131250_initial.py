@@ -28,6 +28,18 @@ def upgrade():
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
+    op.create_table('tracks',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=255), nullable=True),
+    sa.Column('audio_url', sa.Text(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('duration', sa.Integer(), nullable=True),
+    sa.Column('genre', sa.String(length=255), nullable=True),
+    sa.Column('artist_name', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('playlists',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
@@ -42,18 +54,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['playlist_id'], ['playlists.id'], ),
     sa.ForeignKeyConstraint(['track_id'], ['tracks.id'], ),
     sa.PrimaryKeyConstraint('playlist_id', 'track_id')
-    )
-    op.create_table('tracks',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=255), nullable=True),
-    sa.Column('audio_url', sa.Text(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('duration', sa.Integer(), nullable=True),
-    sa.Column('genre', sa.String(length=255), nullable=True),
-    sa.Column('artist_name', sa.String(length=255), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('comments',
     sa.Column('id', sa.Integer(), nullable=False),
