@@ -75,7 +75,7 @@ function LoginFormPage() {
         disabled={isLoginDisabled()}
         className={isLoginDisabled() ? "disabled" : ""}
       >
-        Log In Here </button>
+        Log In </button>
       </form>
     </div>
   );
