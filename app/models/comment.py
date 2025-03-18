@@ -1,4 +1,4 @@
-from .db import db, environment, SCHEMA
+from .db import db, environment, SCHEMA, add_prefix_for_prod
 from sqlalchemy.sql import func
 
 class Comment(db.Model):
@@ -9,8 +9,8 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    track_id = db.Column(db.Integer, db.ForeignKey('tracks.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(add_prefix_for_prod('users.id')), nullable=False)
+    track_id = db.Column(db.Integer, db.ForeignKey(add_prefix_for_prod('tracks.id')), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=func.now())
 
     user = db.relationship('User', back_populates='comments')

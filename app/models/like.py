@@ -1,4 +1,4 @@
-from .db import db, environment, SCHEMA
+from .db import db, environment, SCHEMA, add_prefix_for_prod
 from sqlalchemy.sql import func
 
 class Like(db.Model):
@@ -8,8 +8,10 @@ class Like(db.Model):
         __table_args__ = {'schema': SCHEMA}
     
     # Make these primary keys in all environments
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, primary_key=True)
-    track_id = db.Column(db.Integer, db.ForeignKey('tracks.id'), nullable=False, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(add_prefix_for_prod('users.id')), 
+                       nullable=False, primary_key=True)
+    track_id = db.Column(db.Integer, db.ForeignKey(add_prefix_for_prod('tracks.id')), 
+                        nullable=False, primary_key=True)
     created_at = db.Column(db.TIMESTAMP, server_default=func.now())
 
     user = db.relationship('User', back_populates='likes')
