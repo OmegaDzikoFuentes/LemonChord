@@ -1,8 +1,8 @@
-"""Added many-to-many relationship between playlists and tracks
+"""trying for pt2
 
-Revision ID: a0130fd5e4da
+Revision ID: 52e0c9494187
 Revises: 
-Create Date: 2025-02-25 18:35:32.753576
+Create Date: 2025-03-17 22:01:27.964153
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a0130fd5e4da'
+revision = '52e0c9494187'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,11 +38,12 @@ def upgrade():
     )
     op.create_table('tracks',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('title', sa.String(length=255), nullable=True),
     sa.Column('audio_url', sa.Text(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('duration', sa.Integer(), nullable=True),
     sa.Column('genre', sa.String(length=255), nullable=True),
+    sa.Column('artist_name', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
