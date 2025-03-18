@@ -99,8 +99,15 @@ def run_migrations_online():
             **current_app.extensions['migrate'].configure_args
         )
 
+         # Create a schema (only in production)
+        if environment == "production":
+             connection.execute(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA}")
+ 
+         # Set search path to your schema (only in production)
         with context.begin_transaction():
-            context.run_migrations()
+             if environment == "production":
+                 context.execute(f"SET search_path TO {SCHEMA}")
+             context.run_migrations()
 
 if context.is_offline_mode():
     run_migrations_offline()

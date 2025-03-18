@@ -27,8 +27,8 @@ def seed():
         undo_likes()
     
     seed_users()
-    seed_tracks()
     seed_playlists()
+    seed_tracks()
     seed_comments()
     seed_likes()
     # Add other seed functions here
