@@ -9,7 +9,7 @@ main_routes = Blueprint('main', __name__)
 def ultimate_playlist():
     # Retrieve query parameters for pagination, sorting, and filtering
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    per_page = request.args.get('per_page', 100, type=int)
     sort_by = request.args.get('sort_by', 'created_at')
     genre_filter = request.args.get('genre')
     

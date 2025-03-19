@@ -30,7 +30,7 @@ export const removeGlobalTrack = (trackId) => ({
 // Thunk: Fetch tracks from the ultimate_playlist endpoint
 export const thunkFetchGlobalTracks = (
   page = 1,
-  per_page = 10,
+  per_page = 100,
   sort_by = 'created_at',
   genre = null
 ) => async (dispatch) => {

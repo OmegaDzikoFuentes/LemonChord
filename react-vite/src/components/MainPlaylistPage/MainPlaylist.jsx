@@ -47,7 +47,7 @@ function MainPage() {
 
   // Fetch global tracks on component mount.
   useEffect(() => {
-    dispatch(thunkFetchGlobalTracks());
+    dispatch(thunkFetchGlobalTracks(1, 1000)); // Fetch up to 1000 tracks
     dispatch(thunkFetchPlaylists());
   }, [dispatch]);
 
