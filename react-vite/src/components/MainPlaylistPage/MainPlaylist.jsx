@@ -80,12 +80,24 @@ useEffect(() => {
   }
 }, [currentIndex, tracksArray, isPlaying]);
 
-const handleSkip = useCallback(() => {
-  if (tracksArray.length) {
-    const nextIndex = (currentIndex + 1) % tracksArray.length;
-    setCurrentIndex(nextIndex);
+// Add this after your existing useEffect that fetches tracks
+useEffect(() => {
+  // Once tracks are loaded, select a random starting track
+  if (tracksArray.length > 0) {
+    const randomIndex = Math.floor(Math.random() * tracksArray.length);
+    setCurrentIndex(randomIndex);
   }
-}, [currentIndex, tracksArray]); 
+}, [tracksArray]); 
+
+const handleSkip = useCallback(() => {
+  if (tracksArray.length > 1) { // Only shuffle if there's more than one track
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * tracksArray.length);
+    } while (randomIndex === currentIndex); // Make sure we don't select the same track
+    setCurrentIndex(randomIndex);
+  }
+}, [currentIndex, tracksArray]);
 
 //effect for audio element event listeners:
 useEffect(() => {
