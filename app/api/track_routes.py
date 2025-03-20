@@ -18,7 +18,21 @@ from app.forms.upload_form import UploadForm
 tracks_routes = Blueprint('tracks', __name__)
 
 # Allowed file extensions
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
+ALLOWED_EXTENSIONS = {
+    'mp3',     # Most common format
+    'wav',     # Uncompressed format
+    'ogg',     # Open container format
+    'flac',    # Lossless audio codec
+    'm4a',     # Common iOS format (MPEG-4 Audio)
+    'aac',     # Advanced Audio Coding (used by iOS)
+    '3gp',     # Mobile audio format
+    'wma',     # Windows Media Audio
+    'aiff',    # Apple audio format
+    'alac',    # Apple Lossless Audio Codec
+    'mp4',     # Can contain audio
+    'webm',    # Web audio format
+    'caf'      # Core Audio Format (Apple)
+}
 # Maximum file size (100MB)
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024
 

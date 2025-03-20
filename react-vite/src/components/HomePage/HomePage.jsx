@@ -271,6 +271,8 @@ function HomePage() {
     cancelEditing();
   };
 
+  
+
   return (
     <div className="home-page">
       <header className="home-header">
@@ -382,10 +384,14 @@ function HomePage() {
               <input
                 type="file"
                 id="audio_file"
-                accept="audio/*"
+                accept=".mp3,.wav,.ogg,.flac,.m4a,.aac,.3gp,.wma,.aiff,.alac,.mp4,.webm,.caf"
                 onChange={handleFileChange}
               />
               {errors.audio_file && <p className="error">{errors.audio_file}</p>}
+              <small className="file-format-help">
+                Supported formats: MP3, WAV, M4A, AAC and more. 
+                iPhone users: Please use M4A or AAC format for best results.
+              </small>
             </div>
             {errors.server && <p className="error">{errors.server}</p>}
             <button 
