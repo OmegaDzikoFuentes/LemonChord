@@ -368,6 +368,7 @@ const handleUnlike = () => {
             {tracksArray[currentIndex] && (
               <>
                 <h2>{tracksArray[currentIndex].title}</h2>
+                <p>by: {tracksArray[currentIndex].artist_name}</p>
                 <p>{tracksArray[currentIndex].genre}</p>
                 <span>{tracksArray[currentIndex].like_count} Lemons</span>
               </>
