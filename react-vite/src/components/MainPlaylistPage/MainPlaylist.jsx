@@ -40,6 +40,7 @@ function MainPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [uploadArtist, setUploadArtist] = useState("");
   const [errors, setErrors] = useState({});
+  const [history, setHistory] = useState([]);
 
   // Comment state
   const [commentText, setCommentText] = useState("");
@@ -58,17 +59,16 @@ function MainPage() {
     }
   }, [dispatch, currentIndex, tracksArray]);
 
-// Update audio element source when the current track changes.
-// Effect for handling track changes
-// Update audio element source when the current track changes.
+// In your component, modify the effect to check a data attribute
 useEffect(() => {
   if (tracksArray.length > 0 && audioRef.current) {
-    const wasPlaying = isPlaying;
-    
-    // Only update audio source if the track has actually changed
-    if (audioRef.current.src !== tracksArray[currentIndex].audio_url) {
-      audioRef.current.src = tracksArray[currentIndex].audio_url;
-      audioRef.current.currentTime = 0; // Start from beginning for new tracks
+    const currentTrack = tracksArray[currentIndex];
+    // Only update if the track id has actually changed
+    if (audioRef.current.dataset.trackId !== `${currentTrack.id}`) {
+      audioRef.current.dataset.trackId = currentTrack.id;
+      const wasPlaying = isPlaying;
+      audioRef.current.src = currentTrack.audio_url;
+      audioRef.current.currentTime = 0; // reset playback time
       
       if (wasPlaying) {
         const playPromise = audioRef.current.play();
@@ -80,6 +80,7 @@ useEffect(() => {
   }
 }, [currentIndex, tracksArray, isPlaying]);
 
+
 // Add this after your existing useEffect that fetches tracks
 useEffect(() => {
   // Once tracks are loaded, select a random starting track
@@ -89,15 +90,27 @@ useEffect(() => {
   }
 }, [tracksArray]); 
 
+
+// Modify handleSkip to push current index into history before moving forward
 const handleSkip = useCallback(() => {
-  if (tracksArray.length > 1) { // Only shuffle if there's more than one track
+  if (tracksArray.length > 1) {
+    setHistory(prev => [...prev, currentIndex]); // Save current track index
     let randomIndex;
     do {
       randomIndex = Math.floor(Math.random() * tracksArray.length);
-    } while (randomIndex === currentIndex); // Make sure we don't select the same track
+    } while (randomIndex === currentIndex);
     setCurrentIndex(randomIndex);
   }
 }, [currentIndex, tracksArray]);
+
+// New handler for the back button
+const handleBack = () => {
+  if (history.length > 0) {
+    const lastIndex = history[history.length - 1];
+    setHistory(prev => prev.slice(0, prev.length - 1)); // Remove last index
+    setCurrentIndex(lastIndex);
+  }
+};
 
 //effect for audio element event listeners:
 useEffect(() => {
@@ -295,31 +308,28 @@ useEffect(() => {
     await dispatch(thunkDeleteComment(commentId));
   };
 
-// Manual like/unlike functions for extra buttons.
-const handleLike = () => {
-  if (tracksArray[currentIndex]) {
-    // Save current playback state
-    const wasPlaying = isPlaying;
-    const currentTime = audioRef.current?.currentTime || 0;
-    
-    // Crucial step: Pause the audio manually first to prevent interruption
-    if (wasPlaying && audioRef.current) {
-      audioRef.current.pause();
-    }
-    
-    dispatch(thunkLikeTrack(tracksArray[currentIndex].id))
-      .then(() => {
-        // Restore playback state if necessary
-        if (wasPlaying && audioRef.current) {
-          audioRef.current.currentTime = currentTime;
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(e => console.error("Playback error:", e));
+  const handleLike = () => {
+    if (tracksArray[currentIndex]) {
+      // Save current playback state without pausing
+      const wasPlaying = isPlaying;
+      const currentTime = audioRef.current?.currentTime || 0;
+      
+      // Dispatch the like action without pausing the audio
+      dispatch(thunkLikeTrack(tracksArray[currentIndex].id))
+        .then(() => {
+          // If the track was playing, restore the playback position
+          if (wasPlaying && audioRef.current) {
+            audioRef.current.currentTime = currentTime;
+            // Optionally, ensure playback continues without re-triggering the source update
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(e => console.error("Playback error:", e));
+            }
           }
-        }
-      });
-  }
-};
+        });
+    }
+  };
+  
 
 const handleUnlike = () => {
   if (tracksArray[currentIndex]) {
@@ -364,6 +374,9 @@ const handleUnlike = () => {
         </div>
         <div className="tape-deck">
           <button className="skip-button" onClick={handleSkip}>Skip</button>
+          <button className="back-button" onClick={handleBack} disabled={history.length === 0}>
+  Go Back
+</button>
           <div className="song-info">
             {tracksArray[currentIndex] && (
               <>

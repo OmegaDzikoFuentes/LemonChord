@@ -352,3 +352,117 @@ button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ffea00;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background: #ff8c00;
+}
+
+.back-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Basic responsive adjustments */
+@media screen and (max-width: 768px) {
+  .boom-box-body {
+    flex-direction: column;
+    width: 95%;
+    padding: 10px;
+  }
+  
+  .speaker {
+    width: 100px;
+    height: 100px;
+    margin: 10px 0;
+  }
+  
+  .left-speaker, .right-speaker {
+    margin: 10px 0;
+  }
+  
+  .spinning-lemons {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .logo-banner {
+    font-size: 2rem;
+  }
+  
+  .tape-deck {
+    width: 100%;
+    padding: 15px;
+  }
+  
+  .skip-button, .back-button {
+    position: relative;
+    top: unset;
+    right: unset;
+    left: unset;
+    margin: 5px;
+    padding: 8px 15px;
+    display: inline-block;
+  }
+  
+  .song-info {
+    margin-top: 20px;
+  }
+  
+  .comments-section textarea {
+    height: 60px;
+  }
+  
+  .comment-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .comment-actions {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Even smaller screens */
+@media screen and (max-width: 480px) {
+  .boom-box-header {
+    padding: 10px;
+  }
+  
+  .logo-banner {
+    font-size: 1.5rem;
+  }
+  
+  .speaker {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .spinning-lemons {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .upload-slot form > div {
+    margin-bottom: 10px;
+  }
+  
+  .upload-slot input, .upload-slot button {
+    width: 100%;
+  }
+}
