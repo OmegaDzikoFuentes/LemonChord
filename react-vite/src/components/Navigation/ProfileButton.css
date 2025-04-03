@@ -115,3 +115,28 @@
     color: #ff8c00;
     padding-left: 5px;
   }
+
+  /* Add this to ProfileButton.css */
+.recruiter-demo-item {
+  padding: 8px 0;
+  border-bottom: none !important;
+}
+
+.recruiter-button {
+  background: #ff8c00;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.recruiter-button:hover {
+  background: #ff6a00;
+  transform: translateY(-1px);
+}

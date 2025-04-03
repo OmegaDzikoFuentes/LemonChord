@@ -5,6 +5,7 @@ import { thunkLogout } from "../../redux/session";
 import OpenModalMenuItem from "./OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
 import SignupFormModal from "../SignupFormModal";
+import { thunkLogin } from "../../redux/session"; // Make sure this import is added
 import "./ProfileButton.css";
 
 function ProfileButton() {
@@ -14,7 +15,7 @@ function ProfileButton() {
   const ulRef = useRef();
 
   const toggleMenu = (e) => {
-    e.stopPropagation(); // Keep from bubbling up to document and triggering closeMenu
+    e.stopPropagation();
     setShowMenu(!showMenu);
   };
 
@@ -37,6 +38,15 @@ function ProfileButton() {
   const logout = (e) => {
     e.preventDefault();
     dispatch(thunkLogout());
+    closeMenu();
+  };
+
+  const demoLogin = (e) => {
+    e.preventDefault();
+    dispatch(thunkLogin({
+      email: "demo@aa.io",
+      password: "password"
+    }));
     closeMenu();
   };
 
@@ -67,6 +77,9 @@ function ProfileButton() {
                 onItemClick={closeMenu}
                 modalComponent={<SignupFormModal />}
               />
+              <li className="recruiter-demo-item">
+                <button onClick={demoLogin} className="recruiter-button">Recruiter Demo</button>
+              </li>
             </>
           )}
         </ul>
