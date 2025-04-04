@@ -41,6 +41,12 @@ function ProfileButton() {
     closeMenu();
   };
 
+  const login = (e) => {
+    e.preventDefault();
+    dispatch(thunkLogin());
+    closeMenu();
+  };
+
   const demoLogin = (e) => {
     e.preventDefault();
     dispatch(thunkLogin({
@@ -77,6 +83,9 @@ function ProfileButton() {
                 onItemClick={closeMenu}
                 modalComponent={<SignupFormModal />}
               />
+              <li>
+                <button onClick={login} className="login-button">User Login</button>
+              </li>
               <li className="recruiter-demo-item">
                 <button onClick={demoLogin} className="recruiter-button">Recruiter Demo</button>
               </li>
