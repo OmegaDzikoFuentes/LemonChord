@@ -29,12 +29,18 @@ function LoginFormModal() {
     }
 
     setErrors({});
-    const serverResponse = await dispatch(thunkLogin({ email, password }));
-
-    if (serverResponse) {
-      setErrors(serverResponse);
-    } else {
-      closeModal();
+    
+    try {
+      const serverResponse = await dispatch(thunkLogin({ email, password }));
+      
+      if (serverResponse) {
+        setErrors(serverResponse);
+      } else {
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrors({ general: "Login failed. Please try again." });
     }
   };
 
@@ -52,6 +58,7 @@ function LoginFormModal() {
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </label>
         {errors.email && <p className="error">{errors.email}</p>}
@@ -61,9 +68,11 @@ function LoginFormModal() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </label>
         {errors.password && <p className="error">{errors.password}</p>}
+        {errors.general && <p className="error">{errors.general}</p>}
         <button 
           type="submit" 
           disabled={isLoginDisabled()}
