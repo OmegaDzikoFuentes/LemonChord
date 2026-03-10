@@ -1,85 +1,238 @@
-/* LoginForm.css */
-.cassette-modal {
-    background: #2c2c2c;
-    padding: 30px;
-    border-radius: 10px;
-    position: relative;
-    max-width: 400px;
-    margin: 20px auto;
-    border: 3px solid #000;
-    box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
-  }
-  
-  /* Cassette tape holes */
-  .cassette-modal::before,
-  .cassette-modal::after {
-    content: '';
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: #5a5a5a;
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 2px solid #000;
-  }
-  
-  .cassette-modal::before {
-    left: -15px;
-  }
-  
-  .cassette-modal::after {
-    right: -15px;
-  }
-  
-  .cassette-modal h1 {
-    color: #fff;
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    margin-bottom: 30px;
-    background: linear-gradient(90deg, #ff8c00, #ffea00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .cassette-modal form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .cassette-modal label {
-    color: #fff;
-    font-family: 'Courier New', monospace;
-  }
-  
-  .cassette-modal input {
-    padding: 8px;
-    border-radius: 4px;
-    border: 2px solid #000;
-    background: #4a4a4a;
-    color: #fff;
-  }
-  
-  .cassette-modal button {
-    background: #ff8c00;
-    color: #000;
-    padding: 10px;
-    border: 2px solid #000;
-    border-radius: 5px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-  }
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEMONCHORD — LoginForm.css  (shared by all cassette-modal forms)
+   Theme: Glassmorphism Lemon Grove (matches HomePage.css)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-  .error {
-    color: red;
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-  }
-  
-  button.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+   @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap');
+
+   :root {
+     --lemon-bright:    #f9e831;
+     --lemon-mid:       #e8cf10;
+     --lemon-dark:      #b89e00;
+     --green-zest:      #5cb85c;
+     --green-dark:      #2d7a2d;
+     --white-glass:     rgba(255, 255, 255, 0.22);
+     --border-glass:    rgba(255, 255, 255, 0.48);
+     --shadow-drop:     0 8px 40px rgba(90, 80, 0, 0.22);
+     --shadow-inner:    inset 0 1px 0 rgba(255,255,255,0.60);
+     --blur:            blur(18px);
+     --radius-pill:     999px;
+     --radius-card:     22px;
+     --font-display:    'Pacifico', sans-serif;
+     --font-body:       'Nunito', sans-serif;
+     --text-dark:       #2a2200;
+     --text-mid:        #5a4e00;
+   }
+   
+   /* ── Modal Card ────────────────────────────────────────────────────────────── */
+   .cassette-modal {
+     position: relative;
+     max-width: 420px;
+     width: 100%;
+     margin: 20px auto;
+     padding: 36px 32px 30px;
+     background: rgba(255, 252, 210, 0.45);
+     backdrop-filter: var(--blur);
+     -webkit-backdrop-filter: var(--blur);
+     border: 1px solid var(--border-glass);
+     border-radius: var(--radius-card);
+     box-shadow: var(--shadow-drop), var(--shadow-inner);
+     overflow: visible;
+     animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+   }
+   
+   @keyframes modalPop {
+     from { opacity: 0; transform: scale(0.92) translateY(12px); }
+     to   { opacity: 1; transform: scale(1)    translateY(0); }
+   }
+   
+   /* Lemon bubble "tape hole" decorations — now glowing lemon orbs */
+   .cassette-modal::before,
+   .cassette-modal::after {
+     content: '🍋';
+     position: absolute;
+     width: 42px;
+     height: 42px;
+     border-radius: 50%;
+     top: 50%;
+     transform: translateY(-50%);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-size: 1.5rem;
+     background: radial-gradient(circle at 35% 35%, #fff9c4, #f9e831 55%, #c8a800 100%);
+     border: 2px solid rgba(255,255,255,0.6);
+     box-shadow:
+       0 4px 14px rgba(180,150,0,0.4),
+       inset 0 2px 4px rgba(255,255,255,0.6);
+     animation: orbPulse 2.8s ease-in-out infinite;
+     z-index: 1;
+   }
+   
+   .cassette-modal::before { left: -21px; animation-delay: 0s; }
+   .cassette-modal::after  { right: -21px; animation-delay: 1.4s; }
+   
+   @keyframes orbPulse {
+     0%,100% { box-shadow: 0 4px 14px rgba(180,150,0,0.4), inset 0 2px 4px rgba(255,255,255,0.6); }
+     50%      { box-shadow: 0 6px 22px rgba(180,150,0,0.65), inset 0 2px 4px rgba(255,255,255,0.6); }
+   }
+   
+   /* ── Heading ───────────────────────────────────────────────────────────────── */
+   .cassette-modal h1 {
+     font-family: var(--font-display);
+     font-size: 1.9rem;
+     text-align: center;
+     margin-bottom: 26px;
+     color: var(--text-dark);
+     text-shadow: 0 2px 0 var(--lemon-mid), 0 4px 16px rgba(180,150,0,0.2);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 10px;
+   }
+   
+   .cassette-modal h1::before,
+   .cassette-modal h1::after {
+     content: '🍋';
+     font-size: 1.2rem;
+     animation: wobble 3s ease-in-out infinite;
+   }
+   
+   .cassette-modal h1::after { animation-delay: 1.5s; }
+   
+   @keyframes wobble {
+     0%,100% { transform: rotate(-10deg) scale(1); }
+     50%      { transform: rotate(10deg)  scale(1.15); }
+   }
+   
+   /* ── Form Layout ───────────────────────────────────────────────────────────── */
+   .cassette-modal form {
+     display: flex;
+     flex-direction: column;
+     gap: 14px;
+   }
+   
+   /* ── Labels ────────────────────────────────────────────────────────────────── */
+   .cassette-modal label {
+     display: flex;
+     flex-direction: column;
+     gap: 5px;
+     font-family: var(--font-body);
+     font-weight: 700;
+     font-size: 0.82rem;
+     color: var(--text-mid);
+     text-transform: uppercase;
+     letter-spacing: 0.07em;
+   }
+   
+   .cassette-modal label::before { content: none; } /* override global label lemon */
+   
+   /* ── Inputs ────────────────────────────────────────────────────────────────── */
+   .cassette-modal input {
+     font-family: var(--font-body);
+     font-size: 0.92rem;
+     padding: 10px 16px;
+     border-radius: var(--radius-pill);
+     border: 1px solid rgba(255,255,255,0.5);
+     background: rgba(255,255,255,0.42);
+     backdrop-filter: blur(6px);
+     color: var(--text-dark);
+     box-shadow: inset 0 2px 6px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.7);
+     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+     outline: none;
+     width: 100%;
+   }
+   
+   .cassette-modal input:focus {
+     border-color: var(--lemon-mid);
+     background: rgba(255,255,255,0.65);
+     box-shadow:
+       inset 0 2px 6px rgba(0,0,0,0.04),
+       0 0 0 3px rgba(249,232,49,0.38);
+   }
+   
+   /* ── Submit Button ─────────────────────────────────────────────────────────── */
+   .cassette-modal button[type="submit"],
+   .cassette-modal form > button {
+     position: relative;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     gap: 6px;
+     font-family: var(--font-body);
+     font-weight: 800;
+     font-size: 0.92rem;
+     letter-spacing: 0.03em;
+     border: none;
+     border-radius: var(--radius-pill);
+     cursor: pointer;
+     padding: 11px 24px;
+     margin-top: 6px;
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.55) 0%, transparent 55%),
+       linear-gradient(160deg, #c8e6c9 0%, #43a047 50%, #1b5e20 100%);
+     color: #fff;
+     box-shadow:
+       0 4px 16px rgba(27,94,32,0.38),
+       inset 0 1px 0 rgba(255,255,255,0.45);
+     transition:
+       transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+       box-shadow 0.2s ease,
+       opacity 0.2s ease;
+   }
+   
+   .cassette-modal button[type="submit"]::before,
+   .cassette-modal form > button::before {
+     content: '🍋';
+     font-size: 0.9rem;
+   }
+   
+   .cassette-modal button[type="submit"]:hover:not(:disabled),
+   .cassette-modal form > button:hover:not(:disabled) {
+     transform: scale(1.06) translateY(-2px);
+     box-shadow:
+       0 8px 24px rgba(27,94,32,0.5),
+       inset 0 1px 0 rgba(255,255,255,0.5);
+   }
+   
+   .cassette-modal button[type="submit"]:active:not(:disabled) {
+     transform: scale(0.96) translateY(1px);
+   }
+   
+   .cassette-modal button[type="submit"]:disabled,
+   .cassette-modal button.disabled {
+     opacity: 0.42;
+     cursor: not-allowed;
+     transform: none;
+   }
+   
+   /* ── Error Messages ─────────────────────────────────────────────────────────── */
+   .cassette-modal .error,
+   .cassette-modal p.error {
+     font-size: 0.78rem;
+     font-weight: 700;
+     color: #c62828;
+     background: rgba(255,235,238,0.75);
+     border: 1px solid rgba(198,40,40,0.28);
+     border-radius: 8px;
+     padding: 5px 12px;
+     margin-top: 2px;
+     display: flex;
+     align-items: center;
+     gap: 5px;
+   }
+   
+   .cassette-modal .error::before { content: '⚠️'; font-size: 0.72rem; }
+   
+   /* ── Responsive ────────────────────────────────────────────────────────────── */
+   @media (max-width: 480px) {
+     .cassette-modal {
+       padding: 28px 18px 24px;
+       margin: 12px;
+     }
+   
+     .cassette-modal::before { left: -16px; }
+     .cassette-modal::after  { right: -16px; }
+   
+     .cassette-modal h1 { font-size: 1.5rem; }
+   }

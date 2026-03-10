@@ -1,5 +1,5 @@
 // HomePage.js
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   thunkFetchUserTracks,
@@ -7,6 +7,8 @@ import {
   thunkUpdateTrack,
   thunkDeleteTrack
 } from "../../redux/userTracks";
+import { thunkFetchGlobalTracks } from "../../redux/globalTracks";
+import { thunkLikeTrack, thunkUnlikeTrack } from "../../redux/likes";
 import { 
   thunkCreatePlaylist, 
   thunkDeleteTrackFromPlaylist,
@@ -17,6 +19,232 @@ import { thunkAuthenticate } from "../../redux/session";
 import { thunkFetchPlaylists } from "../../redux/playlists";
 import "./HomePage.css";
 
+// ─── Mini Boombox Component ───────────────────────────────────────────────────
+function MiniBoombox() {
+  const dispatch = useDispatch();
+  const tracksObj = useSelector((state) => state.globalTracks);
+  const likes = useSelector((state) => state.likes);
+  const tracksArray = useMemo(() => Object.values(tracksObj), [tracksObj]);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [hasAutostarted, setHasAutostarted] = useState(false);
+  const audioRef = useRef(null);
+
+  // Fetch global tracks on mount
+  useEffect(() => {
+    dispatch(thunkFetchGlobalTracks(1, 1000));
+  }, [dispatch]);
+
+  // Pick a random starting track once tracks load
+  useEffect(() => {
+    if (tracksArray.length > 0 && !hasAutostarted) {
+      const randomIndex = Math.floor(Math.random() * tracksArray.length);
+      setCurrentIndex(randomIndex);
+    }
+  }, [tracksArray, hasAutostarted]);
+
+  // Autoplay once the random starting track is set
+  useEffect(() => {
+    if (tracksArray.length > 0 && audioRef.current && !hasAutostarted) {
+      const currentTrack = tracksArray[currentIndex];
+      if (!currentTrack) return;
+
+      audioRef.current.src = currentTrack.audio_url;
+      audioRef.current.currentTime = 0;
+
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setHasAutostarted(true);
+          })
+          .catch((e) => {
+            // Autoplay may be blocked; silently fail — user can press play
+            setHasAutostarted(true);
+            console.warn("Autoplay blocked by browser:", e);
+          });
+      }
+    }
+  }, [currentIndex, tracksArray, hasAutostarted]);
+
+  // Sync audio src when currentIndex changes AFTER initial autostart
+  useEffect(() => {
+    if (!hasAutostarted || tracksArray.length === 0 || !audioRef.current) return;
+    const currentTrack = tracksArray[currentIndex];
+    if (!currentTrack) return;
+
+    if (audioRef.current.dataset.trackId !== `${currentTrack.id}`) {
+      audioRef.current.dataset.trackId = currentTrack.id;
+      const wasPlaying = isPlaying;
+      audioRef.current.src = currentTrack.audio_url;
+      audioRef.current.currentTime = 0;
+
+      if (wasPlaying) {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((e) => console.error("Playback error:", e));
+        }
+      }
+    }
+  }, [currentIndex, tracksArray, isPlaying, hasAutostarted]);
+
+  const handleSkip = useCallback(() => {
+    if (tracksArray.length > 1) {
+      setHistory((prev) => [...prev, currentIndex]);
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * tracksArray.length);
+      } while (randomIndex === currentIndex);
+      setCurrentIndex(randomIndex);
+    }
+  }, [currentIndex, tracksArray]);
+
+  const handleBack = () => {
+    if (history.length > 0) {
+      const lastIndex = history[history.length - 1];
+      setHistory((prev) => prev.slice(0, prev.length - 1));
+      setCurrentIndex(lastIndex);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch((e) => console.error("Playback error:", e));
+    }
+  };
+
+  // Audio event listeners
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onEnded = () => {
+      setIsPlaying(false);
+      handleSkip();
+    };
+
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
+    el.addEventListener("ended", onEnded);
+
+    return () => {
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
+      el.removeEventListener("ended", onEnded);
+    };
+  }, [handleSkip]);
+
+  const handleLike = () => {
+    if (!tracksArray[currentIndex]) return;
+    dispatch(thunkLikeTrack(tracksArray[currentIndex].id));
+  };
+
+  const handleUnlike = () => {
+    if (!tracksArray[currentIndex]) return;
+    dispatch(thunkUnlikeTrack(tracksArray[currentIndex].id));
+  };
+
+  const currentTrack = tracksArray[currentIndex];
+  const isLiked = currentTrack && likes[currentTrack.id];
+
+  return (
+    <div className="mini-boombox">
+      <div className="mini-boombox-inner">
+        {/* Left decorative speaker */}
+        <div className="mini-speaker mini-speaker-left">
+          <div className="mini-speaker-grill">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="mini-speaker-dot" />
+            ))}
+          </div>
+        </div>
+
+        {/* Center player */}
+        <div className="mini-player-center">
+          <div className="mini-cassette">
+            <div className={`mini-cassette-reel ${isPlaying ? "spinning" : ""}`} />
+            <div className="mini-cassette-label">
+              {currentTrack ? (
+                <>
+                  <p className="mini-track-title">{currentTrack.title}</p>
+                  <p className="mini-track-artist">{currentTrack.artist_name || "Unknown Artist"}</p>
+                  <p className="mini-track-genre">{currentTrack.genre}</p>
+                </>
+              ) : (
+                <p className="mini-track-title">Loading...</p>
+              )}
+            </div>
+            <div className={`mini-cassette-reel ${isPlaying ? "spinning" : ""}`} />
+          </div>
+
+          {/* Hidden native audio element */}
+          <audio ref={audioRef} style={{ display: "none" }} />
+
+          {/* Controls */}
+          <div className="mini-controls">
+            <button
+              className="mini-btn mini-btn-back"
+              onClick={handleBack}
+              disabled={history.length === 0}
+              title="Go Back"
+            >
+              ⏮
+            </button>
+            <button
+              className="mini-btn mini-btn-playpause"
+              onClick={handlePlayPause}
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? "⏸" : "▶"}
+            </button>
+            <button
+              className="mini-btn mini-btn-skip"
+              onClick={handleSkip}
+              title="Skip"
+            >
+              ⏭
+            </button>
+            <button
+              className={`mini-btn mini-btn-like ${isLiked ? "liked" : ""}`}
+              onClick={isLiked ? handleUnlike : handleLike}
+              title={isLiked ? "Unlike" : "Like"}
+            >
+              🍋 {currentTrack?.like_count || 0}
+            </button>
+          </div>
+        </div>
+
+        {/* Right decorative speaker */}
+        <div className="mini-speaker mini-speaker-right">
+          <div className="mini-speaker-grill">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="mini-speaker-dot" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Now Playing ticker */}
+      <div className="mini-ticker-wrap">
+        <div className="mini-ticker">
+          {currentTrack
+            ? `🎵 NOW PLAYING: ${currentTrack.title} by ${currentTrack.artist_name || "Unknown"} · ${currentTrack.genre} · ${currentTrack.like_count || 0} Lemons`
+            : "🎵 LEMONCHORD RADIO — Loading tracks..."}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HomePage ─────────────────────────────────────────────────────────────────
 function HomePage() {
   const dispatch = useDispatch();
   const sessionUser = useSelector((state) => state.session.user);
@@ -41,7 +269,6 @@ function HomePage() {
   const [editDuration, setEditDuration] = useState("");
   const [editArtist, setEditArtist] = useState("");
 
-
   // Fetch session and user tracks on component mount.
   useEffect(() => {
     dispatch(thunkAuthenticate());
@@ -58,50 +285,47 @@ function HomePage() {
     setUploadFile(e.target.files[0]);
   };
 
-  
   const handleUpload = async (e) => {
-      e.preventDefault();
-      setErrors({}); // Reset errors
+    e.preventDefault();
+    setErrors({});
+    
+    const newErrors = {};
+    if (!uploadFile) newErrors.audio_file = "Audio file is required";
+    if (!uploadTitle.trim()) newErrors.title = "Title is required";
+    if (!uploadGenre.trim()) newErrors.genre = "Genre is required";
+    if (!uploadDuration || uploadDuration < 10) newErrors.duration = "Duration must be at least 10 seconds";
+  
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      setUploadProgress(10);
+      const formData = new FormData();
+      formData.append("audio_file", uploadFile);
+      formData.append("title", uploadTitle || "New Track");
+      formData.append("genre", uploadGenre || "Unknown");
+      formData.append("duration", uploadDuration || 180);
+      formData.append("artist_name", uploadArtist || ""); 
+
+      setTimeout(() => setUploadProgress(50), 500);
+      setTimeout(() => setUploadProgress(80), 1000);
       
-      // Client-side validation
-      const newErrors = {};
-      if (!uploadFile) newErrors.audio_file = "Audio file is required";
-      if (!uploadTitle.trim()) newErrors.title = "Title is required";
-      if (!uploadGenre.trim()) newErrors.genre = "Genre is required";
-      if (!uploadDuration || uploadDuration < 10) newErrors.duration = "Duration must be at least 10 seconds";
-    
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        return;
+      setUploadProgress(100);
+      setTimeout(() => setUploadProgress(0), 500);
+      
+      const result = await dispatch(thunkCreateTrack(formData));
+  
+      if (result?.errors) {
+        setErrors(result.errors);
+      } else {
+        setUploadFile(null);
+        setUploadTitle("");
+        setUploadGenre("");
+        setUploadDuration("");
+        setUploadArtist("");
       }
-
-      try {
-        setUploadProgress(10);
-        const formData = new FormData();
-        formData.append("audio_file", uploadFile);
-        formData.append("title", uploadTitle || "New Track");
-        formData.append("genre", uploadGenre || "Unknown");
-        formData.append("duration", uploadDuration || 180);
-        formData.append("artist_name", uploadArtist || ""); 
-
-        setTimeout(() => setUploadProgress(50), 500);
-        setTimeout(() => setUploadProgress(80), 1000);
-        
-        setUploadProgress(100);
-        setTimeout(() => setUploadProgress(0), 500);
-        
-        const result = await dispatch(thunkCreateTrack(formData));
-    
-        if (result?.errors) {
-          setErrors(result.errors);
-        } else {
-          // Reset form on success
-          setUploadFile(null);
-          setUploadTitle("");
-          setUploadGenre("");
-          setUploadDuration("");
-          setUploadArtist("");
-        }
     } catch (error) {
       setErrors({ server: "Error uploading track" });
     } finally {
@@ -113,134 +337,82 @@ function HomePage() {
     dispatch(thunkDeleteTrack(trackId));
   };
 
-  // Remove a track from a given playlist
   const handleDeleteFromPlaylist = async (playlistId, trackId) => {
     await dispatch(thunkDeleteTrackFromPlaylist(playlistId, trackId));
   };
 
-  // Delete a given playlist
   const handleDeletePlaylist = async (playlistId) => {
     if (window.confirm("Are you sure you want to delete this playlist?")) {
       await dispatch(thunkDeletePlaylist(playlistId));
     }
   };
 
-  // Create a new playlist with a custom name
   const handleCreatePlaylist = async () => {
-    // Prompt user for playlist name
     const name = prompt("Enter playlist name:", "My Playlist");
-    
-    // Exit if user cancels the prompt
     if (name === null) return;
-    
-    // Use provided name or default to "My Playlist" if empty
     const cleanName = name.trim() || "My Playlist";
-    
-    // Check for duplicates
     const exists = playlistsArray.some(playlist => 
       playlist.name.toLowerCase() === cleanName.toLowerCase()
     );
-
     if (exists) {
       alert("Playlist name already exists! Please choose a different name.");
       return;
     }
-
-    // Create the playlist
     const playlistData = { name: cleanName };
     const result = await dispatch(thunkCreatePlaylist(playlistData));
-    
     if (result && result.data) {
-      // Optional: Give feedback to the user
       alert(`New playlist created: ${cleanName}`);
     }
   };
 
-  // Add a track to a playlist
   const handleAddTrackToPlaylist = async (trackId) => {
-    // If no playlists yet, create one directly
     if (playlistsArray.length === 0) {
       const name = prompt("Enter playlist name:", "My Playlist");
-      
-      // Exit if user cancels the prompt
       if (name === null) return;
-      
       const cleanName = name.trim() || "My Playlist";
-      
-      const playlistData = {
-        name: cleanName,
-        trackId: trackId, // Include track ID in the creation
-      };
-        
+      const playlistData = { name: cleanName, trackId };
       await dispatch(thunkCreatePlaylist(playlistData));
       alert(`New playlist created: ${cleanName}`);
       return;
     }
     
-    // Build options for playlist selection
     const options = ["Create New Playlist"];
-    
-    // Add existing playlists to options
     playlistsArray.forEach(playlist => {
       options.push(`Add to: ${playlist.name}`);
     });
     
-    // Let user select from options
     const selection = prompt(
       `Select an option (enter number 1-${options.length}):\n` +
       options.map((opt, i) => `${i+1}. ${opt}`).join('\n')
     );
     
-    if (!selection) return; // User canceled
-    
+    if (!selection) return;
     const selectedIndex = parseInt(selection) - 1;
-    
-    // Validate selection
     if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= options.length) {
       alert("Invalid selection");
       return;
     }
     
-    // Handle creating new playlist
     if (selectedIndex === 0) {
       const name = prompt("Enter playlist name:", "My Playlist");
-      
-      // Exit if user cancels the prompt
       if (name === null) return;
-      
       const cleanName = name.trim() || "My Playlist";
-      
-      // Check for duplicates
       const exists = playlistsArray.some(playlist => 
         playlist.name.toLowerCase() === cleanName.toLowerCase()
       );
-  
       if (exists) {
         alert("Playlist name already exists! Please choose a different name.");
         return;
       }
-  
-      const playlistData = {
-        name: cleanName,
-        trackId: trackId,
-      };
-        
-      await dispatch(thunkCreatePlaylist(playlistData));
+      await dispatch(thunkCreatePlaylist({ name: cleanName, trackId }));
       alert(`New playlist created: ${cleanName}`);
-    } 
-    // Handle adding to existing playlist
-    else {
-      const playlistIndex = selectedIndex - 1;
-      const selectedPlaylist = playlistsArray[playlistIndex];
-      
-      // Check if track is already in the playlist
+    } else {
+      const selectedPlaylist = playlistsArray[selectedIndex - 1];
       const trackAlreadyInPlaylist = selectedPlaylist.tracks?.some(track => track.id === trackId);
-      
       if (trackAlreadyInPlaylist) {
         alert("This track is already in the selected playlist!");
         return;
       }
-      
       await dispatch(thunkAddTrackToPlaylist(selectedPlaylist.id, trackId));
       alert(`Track added to playlist: ${selectedPlaylist.name}`);
     }
@@ -271,14 +443,15 @@ function HomePage() {
     cancelEditing();
   };
 
-  
-
   return (
     <div className="home-page">
       <header className="home-header">
-        <h1>Welcome to LemonChord</h1>
+        <h1>Welcome to LemonChord Radio</h1>
       </header>
-      
+
+      {/* ── Mini Boombox Player ── always visible, autoplays on load */}
+      <MiniBoombox />
+
       {/* My Playlists Section */}
       <section className="playlist-section">
         <h2>My Playlists</h2>

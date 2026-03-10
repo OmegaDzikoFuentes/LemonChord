@@ -1,24 +1,31 @@
-#modal {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEMONCHORD — Modal.css
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-#modal-background {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-#modal-content {
-  position: absolute;
-  background-color:white;
-}
+   #modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;          /* ← sits above everything, including backdrop-filter elements */
+  }
+  
+  #modal-background {
+    position: fixed;
+    inset: 0;
+    background: rgba(180, 160, 0, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+  }
+  
+  #modal-content {
+    position: relative;
+    z-index: 10000;         /* ← above the background overlay */
+    background: transparent; /* let .cassette-modal handle its own glass background */
+    border-radius: 22px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 0;
+  }

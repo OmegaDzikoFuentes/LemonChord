@@ -1,142 +1,246 @@
-/* ProfileButton.css */
-.profile-button {
-    background: #333;
-    border: 2px solid #000;
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-  }
-  
-  .profile-button:hover {
-    transform: translateY(-2px);
-    background: #ff8c00;
-  }
-  
-  .profile-button svg {
-    color: #ff8c00;
-    font-size: 1.5rem;
-    transition: color 0.3s ease;
-  }
-  
-  .profile-button:hover svg {
-    color: #333;
-  }
-  
-  .profile-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: #2c2c2c;
-    border: 3px solid #000;
-    border-radius: 10px;
-    padding: 20px;
-    list-style: none;
-    margin: 10px 0 0;
-    min-width: 200px;
-    box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
-    z-index: 1000;
-    font-family: 'Courier New', monospace;
-  }
-  
-  /* Cassette tape holes */
-  .profile-dropdown::before,
-  .profile-dropdown::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: #5a5a5a;
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 2px solid #000;
-  }
-  
-  .profile-dropdown::before {
-    left: -10px;
-  }
-  
-  .profile-dropdown::after {
-    right: -10px;
-  }
-  
-  .profile-dropdown li {
-    color: #fff;
-    padding: 8px 0;
-    border-bottom: 1px solid #4a4a4a;
-  }
-  
-  .profile-dropdown li:first-child {
-    font-size: 1.1rem;
-    background: linear-gradient(90deg, #ff8c00, #ffea00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    border-bottom: 2px solid #ff8c00;
-    padding-bottom: 10px;
-  }
-  
-  .profile-dropdown li:last-child {
-    border-bottom: none;
-  }
-  
-  .profile-dropdown button {
-    background: #ff8c00;
-    color: #000;
-    border: 2px solid #000;
-    border-radius: 5px;
-    padding: 8px 16px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.3s ease;
-  }
-  
-  .profile-dropdown button:hover {
-    background: #ff6a00;
-    transform: translateY(-1px);
-  }
-  
-  /* Menu items styling */
-  .profile-dropdown .modal-menu-item {
-    color: #fff;
-    background: none;
-    border: none;
-    padding: 8px 0;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .profile-dropdown .modal-menu-item:hover {
-    color: #ff8c00;
-    padding-left: 5px;
-  }
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEMONCHORD — ProfileButton.css
+   Theme: Glassmorphism Lemon Grove (matches HomePage.css)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-  /* Add this to ProfileButton.css */
-.recruiter-demo-item {
-  padding: 8px 0;
-  border-bottom: none !important;
-}
+   @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap');
 
-.recruiter-button {
-  background: #ff8c00;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 5px;
-  padding: 8px 16px;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  cursor: pointer;
-  width: 100%;
-  transition: all 0.3s ease;
-  margin-top: 8px;
-}
-
-.recruiter-button:hover {
-  background: #ff6a00;
-  transform: translateY(-1px);
-}
+   :root {
+     --lemon-bright:    #f9e831;
+     --lemon-mid:       #e8cf10;
+     --lemon-dark:      #b89e00;
+     --green-zest:      #5cb85c;
+     --green-dark:      #2d7a2d;
+     --white-glass:     rgba(255, 255, 255, 0.22);
+     --border-glass:    rgba(255, 255, 255, 0.48);
+     --shadow-drop:     0 8px 32px rgba(90, 80, 0, 0.22);
+     --shadow-inner:    inset 0 1px 0 rgba(255,255,255,0.55);
+     --blur:            blur(16px);
+     --radius-pill:     999px;
+     --radius-card:     18px;
+     --font-body:       'Nunito', sans-serif;
+     --font-display:    'Pacifico', sans-serif;
+     --text-dark:       #2a2200;
+     --text-mid:        #5a4e00;
+   }
+   
+   /* ── Profile Icon Button ───────────────────────────────────────────────────── */
+   .profile-button {
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     width: 42px;
+     height: 42px;
+     padding: 0;
+     border-radius: 50%;
+     border: none;
+     cursor: pointer;
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.70) 0%, transparent 60%),
+       linear-gradient(160deg, #fff9c4 0%, #f9e831 45%, #d4b800 100%);
+     box-shadow:
+       0 4px 14px rgba(180,150,0,0.32),
+       inset 0 1px 0 rgba(255,255,255,0.75),
+       inset 0 -2px 4px rgba(0,0,0,0.07);
+     transition:
+       transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+       box-shadow 0.2s ease;
+   }
+   
+   /* Override the global button::before lemon emoji for this icon button */
+   .profile-button::before { content: none; }
+   
+   .profile-button svg {
+     color: var(--text-dark);
+     font-size: 1.4rem;
+     transition: color 0.2s ease, transform 0.2s ease;
+   }
+   
+   .profile-button:hover {
+     transform: scale(1.12) translateY(-2px);
+     box-shadow:
+       0 8px 22px rgba(180,150,0,0.45),
+       inset 0 1px 0 rgba(255,255,255,0.85);
+   }
+   
+   .profile-button:hover svg {
+     color: var(--green-dark);
+     transform: scale(1.1);
+   }
+   
+   /* ── Dropdown Panel ────────────────────────────────────────────────────────── */
+   .profile-dropdown {
+     position: absolute;
+     top: calc(100% + 10px);
+     right: 0;
+     min-width: 210px;
+     list-style: none;
+     margin: 0;
+     padding: 12px 10px;
+     display: flex;
+     flex-direction: column;
+     gap: 4px;
+     background: rgba(255, 252, 210, 0.55);
+     backdrop-filter: var(--blur);
+     -webkit-backdrop-filter: var(--blur);
+     border: 1px solid var(--border-glass);
+     border-radius: var(--radius-card);
+     box-shadow: var(--shadow-drop), var(--shadow-inner);
+     z-index: 10001;
+     animation: dropIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+     overflow: visible;
+   }
+   
+   @keyframes dropIn {
+     from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+     to   { opacity: 1; transform: translateY(0)    scale(1); }
+   }
+   
+   /* Lemon orb side decorations — cassette holes reimagined */
+   .profile-dropdown::before,
+   .profile-dropdown::after {
+     content: '🍋';
+     position: absolute;
+     width: 28px;
+     height: 28px;
+     border-radius: 50%;
+     top: 50%;
+     transform: translateY(-50%);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-size: 1rem;
+     background: radial-gradient(circle at 35% 35%, #fff9c4, #f9e831 55%, #c8a800 100%);
+     border: 1px solid rgba(255,255,255,0.6);
+     box-shadow: 0 3px 10px rgba(180,150,0,0.35), inset 0 1px 3px rgba(255,255,255,0.6);
+     z-index: 1;
+   }
+   
+   .profile-dropdown::before { left: -14px; }
+   .profile-dropdown::after  { right: -14px; }
+   
+   /* ── Dropdown List Items ───────────────────────────────────────────────────── */
+   .profile-dropdown li {
+     font-family: var(--font-body);
+     font-weight: 700;
+     font-size: 0.88rem;
+     color: var(--text-dark);
+     padding: 8px 12px;
+     border-radius: 10px;
+     border-bottom: 1px solid rgba(255,255,255,0.35);
+     transition: background 0.15s ease, transform 0.15s ease;
+     cursor: pointer;
+   }
+   
+   .profile-dropdown li:last-child { border-bottom: none; }
+   
+   .profile-dropdown li:hover {
+     background: rgba(255,255,255,0.35);
+     transform: translateX(3px);
+   }
+   
+   /* First item (username) — styled as a display label, not interactive */
+   .profile-dropdown li:first-child {
+     font-family: var(--font-display);
+     font-size: 1rem;
+     color: var(--text-dark);
+     padding-bottom: 10px;
+     border-bottom: 1px solid rgba(249,232,49,0.5);
+     cursor: default;
+     display: flex;
+     align-items: center;
+     gap: 6px;
+   }
+   
+   .profile-dropdown li:first-child::before { content: '🍋'; font-size: 0.9rem; }
+   .profile-dropdown li:first-child:hover   { background: none; transform: none; }
+   
+   /* Second item (email) — muted label */
+   .profile-dropdown li:nth-child(2) {
+     font-size: 0.75rem;
+     color: var(--text-mid);
+     font-style: italic;
+     font-weight: 600;
+     cursor: default;
+     padding-top: 4px;
+   }
+   
+   .profile-dropdown li:nth-child(2):hover { background: none; transform: none; }
+   
+   /* ── Buttons inside dropdown ───────────────────────────────────────────────── */
+   .profile-dropdown button,
+   .profile-dropdown .recruiter-button {
+     width: 100%;
+     font-family: var(--font-body);
+     font-weight: 800;
+     font-size: 0.82rem;
+     border: none;
+     border-radius: var(--radius-pill);
+     cursor: pointer;
+     padding: 9px 16px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     gap: 5px;
+     transition:
+       transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+       box-shadow 0.2s ease;
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.7) 0%, transparent 60%),
+       linear-gradient(160deg, #fff59d 0%, #f9e831 45%, #d4b800 100%);
+     color: var(--text-dark);
+     box-shadow:
+       0 3px 10px rgba(180,150,0,0.28),
+       inset 0 1px 0 rgba(255,255,255,0.7);
+   }
+   
+   .profile-dropdown button::before,
+   .profile-dropdown .recruiter-button::before {
+     content: '🍋';
+     font-size: 0.8rem;
+   }
+   
+   .profile-dropdown button:hover,
+   .profile-dropdown .recruiter-button:hover {
+     transform: scale(1.05) translateY(-1px);
+     box-shadow:
+       0 6px 18px rgba(180,150,0,0.40),
+       inset 0 1px 0 rgba(255,255,255,0.8);
+   }
+   
+   /* Log Out — red lemon */
+   .profile-dropdown li:has(button[onClick*="logout"]) button,
+   .profile-dropdown button.logout-btn {
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.6) 0%, transparent 55%),
+       linear-gradient(160deg, #ffcdd2 0%, #e53935 50%, #b71c1c 100%);
+     color: #fff;
+     box-shadow: 0 3px 10px rgba(183,28,28,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+   }
+   
+   /* Recruiter Demo — green lemon */
+   .recruiter-button {
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.55) 0%, transparent 55%),
+       linear-gradient(160deg, #c8e6c9 0%, #43a047 50%, #1b5e20 100%) !important;
+     color: #fff !important;
+     box-shadow: 0 3px 10px rgba(27,94,32,0.32), inset 0 1px 0 rgba(255,255,255,0.4) !important;
+   }
+   
+   .recruiter-demo-item { border-bottom: none !important; }
+   
+   /* ── OpenModalMenuItem <li> click targets ──────────────────────────────────── */
+   .profile-dropdown li.modal-menu-item,
+   .profile-dropdown li[onClick] {
+     color: var(--text-dark);
+     font-weight: 700;
+     display: flex;
+     align-items: center;
+     gap: 6px;
+   }
+   
+   .profile-dropdown li.modal-menu-item::before,
+   .profile-dropdown li[onClick]::before {
+     content: '🍋';
+     font-size: 0.8rem;
+   }

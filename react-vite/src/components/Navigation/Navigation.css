@@ -1,44 +1,161 @@
-/* Container for the navigation bar */
-.nav-list {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  list-style: none;
-  margin: 0;
-  padding: 10px 20px;
-  background: linear-gradient(90deg, #ffea00, #ff8c00);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEMONCHORD — Navigation.css
+   Theme: Glassmorphism Lemon Grove (matches HomePage.css)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Each navigation item */
-.nav-list li {
-  margin: 0 10px;
-  position: relative;
-}
+   @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap');
 
-/* Style all nav items as buttons */
-.nav-button {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #333;
-  color: white !important;
-  border-radius: 5px;
-  border: 2px solid #000;
-  text-decoration: none;
-  font-family: 'Courier New', monospace;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-  transition: transform 0.2s;
-}
-
-.nav-button:hover {
-  transform: translateY(-2px);
-  color: #ff8c00 !important;
-}
-
-/* Profile dropdown positioning */
-.profile-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 5px;
-}
+   :root {
+     --lemon-bright:    #f9e831;
+     --lemon-mid:       #e8cf10;
+     --lemon-dark:      #b89e00;
+     --green-zest:      #5cb85c;
+     --green-dark:      #2d7a2d;
+     --white-glass:     rgba(255, 255, 255, 0.22);
+     --border-glass:    rgba(255, 255, 255, 0.48);
+     --shadow-drop:     0 4px 24px rgba(90, 80, 0, 0.18);
+     --shadow-inner:    inset 0 1px 0 rgba(255,255,255,0.55);
+     --blur:            blur(16px);
+     --radius-pill:     999px;
+     --font-display:    'Pacifico', cursive;
+     --font-body:       'Nunito', sans-serif;
+     --text-dark:       #2a2200;
+     --text-mid:        #5a4e00;
+   }
+   
+   /* ── Nav Bar Container ─────────────────────────────────────────────────────── */
+   .nav-list {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     list-style: none;
+     margin: 0;
+     padding: 12px 28px;
+     gap: 10px;
+     background: rgba(255, 248, 180, 0.30);
+     backdrop-filter: var(--blur);
+     -webkit-backdrop-filter: var(--blur);
+     border-bottom: 1px solid var(--border-glass);
+     box-shadow: var(--shadow-drop), var(--shadow-inner);
+     position: sticky;
+     top: 0;
+     z-index: 100;
+   }
+   
+   /* ── Each Nav Item ─────────────────────────────────────────────────────────── */
+   .nav-list li {
+     position: relative;
+   }
+   
+   /* ── Nav Button ────────────────────────────────────────────────────────────── */
+   .nav-button {
+     display: inline-flex;
+     align-items: center;
+     gap: 5px;
+     padding: 9px 20px;
+     font-family: var(--font-body);
+     font-weight: 800;
+     font-size: 0.85rem;
+     letter-spacing: 0.03em;
+     color: var(--text-dark) !important;
+     text-decoration: none;
+     border-radius: var(--radius-pill);
+     border: 1px solid rgba(255,255,255,0.55);
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.70) 0%, transparent 60%),
+       linear-gradient(160deg, #fff9c4 0%, #f9e831 45%, #d4b800 100%);
+     box-shadow:
+       0 4px 14px rgba(180,150,0,0.28),
+       inset 0 1px 0 rgba(255,255,255,0.75),
+       inset 0 -2px 4px rgba(0,0,0,0.06);
+     transition:
+       transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+       box-shadow 0.2s ease,
+       background 0.2s ease;
+     white-space: nowrap;
+     cursor: pointer;
+   }
+   
+   /* Lemon emoji prefix on each nav button */
+   .nav-button::before {
+     content: '🍋';
+     font-size: 0.85rem;
+     line-height: 1;
+   }
+   
+   .nav-button:hover {
+     transform: scale(1.1) translateY(-2px);
+     color: var(--text-dark) !important;
+     box-shadow:
+       0 8px 22px rgba(180,150,0,0.42),
+       inset 0 1px 0 rgba(255,255,255,0.85);
+   }
+   
+   .nav-button:active {
+     transform: scale(0.95) translateY(1px);
+   }
+   
+   /* Active / current page state */
+   .nav-button.active,
+   .nav-button[aria-current="page"] {
+     background:
+       radial-gradient(circle at 35% 30%, rgba(255,255,255,0.55) 0%, transparent 55%),
+       linear-gradient(160deg, #c8e6c9 0%, #43a047 50%, #1b5e20 100%);
+     color: #fff !important;
+     box-shadow:
+       0 4px 16px rgba(27,94,32,0.38),
+       inset 0 1px 0 rgba(255,255,255,0.45);
+   }
+   
+   /* ── Profile Dropdown ──────────────────────────────────────────────────────── */
+   .profile-dropdown {
+     position: absolute;
+     top: calc(100% + 10px);
+     right: 0;
+     min-width: 160px;
+     display: flex;
+     flex-direction: column;
+     gap: 6px;
+     padding: 10px;
+     background: rgba(255, 252, 210, 0.55);
+     backdrop-filter: var(--blur);
+     -webkit-backdrop-filter: var(--blur);
+     border: 1px solid var(--border-glass);
+     border-radius: 16px;
+     box-shadow:
+       0 12px 36px rgba(90,80,0,0.22),
+       inset 0 1px 0 rgba(255,255,255,0.6);
+     z-index: 200;
+     animation: dropIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+   }
+   
+   @keyframes dropIn {
+     from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+     to   { opacity: 1; transform: translateY(0)    scale(1); }
+   }
+   
+   /* Dropdown items inherit nav-button pill style */
+   .profile-dropdown .nav-button {
+     width: 100%;
+     justify-content: flex-start;
+   }
+   
+   /* ── Responsive ────────────────────────────────────────────────────────────── */
+   @media (max-width: 600px) {
+     .nav-list {
+       padding: 10px 12px;
+       gap: 6px;
+       flex-wrap: wrap;
+       justify-content: center;
+     }
+   
+     .nav-button {
+       padding: 7px 14px;
+       font-size: 0.78rem;
+     }
+   
+     .profile-dropdown {
+       right: unset;
+       left: 0;
+     }
+   }
